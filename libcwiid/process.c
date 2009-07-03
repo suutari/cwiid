@@ -44,6 +44,8 @@ int process_status(struct wiimote *wiimote, const unsigned char *data,
 {
 	struct cwiid_status_mesg status_mesg;
 
+	(void)ma;
+
 	status_mesg.type = CWIID_MESG_STATUS;
 	status_mesg.battery = data[5];
 	if (data[2] & 0x02) {
