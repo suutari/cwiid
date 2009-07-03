@@ -41,6 +41,8 @@ int cwiid_set_err(cwiid_err_t *err)
 
 void cwiid_err_default(struct wiimote *wiimote, const char *str, va_list ap)
 {
+	(void)wiimote;
+
 	vfprintf(stderr, str, ap);
 	fprintf(stderr, "\n");
 }
