@@ -162,6 +162,8 @@ static PyObject *
 {
 	Wiimote* self;
 
+	(void)kwds;
+
 	if (!(self = (Wiimote *) type->tp_alloc(type, 0))) {
 		return NULL;
 	}
