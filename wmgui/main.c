@@ -1040,6 +1040,8 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 	char *ext_str;
 	static enum cwiid_ext_type ext_type = CWIID_EXT_NONE;
 
+	(void)timestamp;
+
 	gdk_threads_enter();
 	for (i=0; i < mesg_count; i++) {
 		switch (mesg_array[i].type) {
