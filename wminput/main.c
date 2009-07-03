@@ -405,6 +405,8 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 {
 	int i;
 
+	(void)timestamp;
+
 	for (i=0; i < mesg_count; i++) {
 		switch (mesg[i].type) {
 		case CWIID_MESG_BTN:
