@@ -77,6 +77,8 @@ void print_usage(void)
 
 void cwiid_err_connect(struct wiimote *wiimote, const char *str, va_list ap)
 {
+	(void)wiimote;
+
 	/* TODO: temporary kludge to stifle error messages from cwiid_open */
 	if (errno != EHOSTDOWN) {
 		vfprintf(stderr, str, ap);
