@@ -1066,6 +1066,8 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 			case CWIID_EXT_CLASSIC:
 				ext_str = "Classic controller";
 				break;
+			case CWIID_EXT_BALANCE:
+				ext_str = "Balance Board";
 			case CWIID_EXT_MOTIONPLUS:
 				ext_str = "MotionPlus";
 				break;
