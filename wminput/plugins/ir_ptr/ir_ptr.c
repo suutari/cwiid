@@ -77,7 +77,7 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg mesg[])
 	static uint8_t old_flag;
 
 	int i;
-	uint8_t flag;
+	//uint8_t flag;
 	struct cwiid_ir_mesg *ir_mesg;
 
 	ir_mesg = NULL;
