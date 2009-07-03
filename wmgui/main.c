@@ -826,6 +826,8 @@ void drawStick_expose_event(GtkWidget *drawStick, GdkEventExpose *event,
 {
 	gint width, height;
 
+	(void)event;
+
 	gdk_window_get_geometry(drawStick->window, NULL, NULL, &width, &height,
 	                        NULL);
 	gdk_draw_arc(drawStick->window,
