@@ -50,6 +50,8 @@ struct wmplugin_info *wmplugin_info() {
 
 int wmplugin_init(int id, cwiid_wiimote_t *arg_wiimote)
 {
+	(void)arg_wiimote;
+
 	data.buttons = 0;
 	if (wmplugin_set_rpt_mode(id, CWIID_RPT_NUNCHUK)) {
 		return -1;
