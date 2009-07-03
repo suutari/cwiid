@@ -677,6 +677,8 @@ static int Wiimote_set_led(Wiimote *self, PyObject *PyLed, void *closure)
 {
 	long led;
 
+	(void)closure;
+
 	if (!self->wiimote) {
 		SET_CLOSED_ERROR;
 		return -1;
