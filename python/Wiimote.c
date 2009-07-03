@@ -374,6 +374,8 @@ static PyObject *Wiimote_get_state(Wiimote* self, void *closure)
 	struct cwiid_state state;
 	PyObject *PyState;
 
+	(void)closure;
+
 	if (!self->wiimote) {
 		SET_CLOSED_ERROR;
 		return NULL;
