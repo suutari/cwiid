@@ -180,6 +180,8 @@ int process_ext(struct wiimote *wiimote, unsigned char *data,
 	struct cwiid_motionplus_mesg *motionplus_mesg;
 	int i;
 
+	(void)len;
+
 	switch (wiimote->state.ext_type) {
 	case CWIID_EXT_NONE:
 		cwiid_err(wiimote, "Received unexpected extension report");
