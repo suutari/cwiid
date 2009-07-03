@@ -307,6 +307,8 @@ static int
 {
 	PyObject *OldCallback;
 
+	(void)closure;
+
 	if (!self->wiimote) {
 		SET_CLOSED_ERROR;
 		return -1;
