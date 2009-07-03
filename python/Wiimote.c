@@ -700,6 +700,8 @@ static int
 {
 	long rumble;
 
+	(void)closure;
+
 	if (!self->wiimote) {
 		SET_CLOSED_ERROR;
 		return -1;
