@@ -594,6 +594,8 @@ static PyObject *set_rpt_mode(PyObject *self, PyObject *args, PyObject *kwds)
 	static char *kwlist[] = {"id", "rpt_mode", NULL};
 	int id, rpt_mode;
 
+	(void)self;
+
 	if (!PyArg_ParseTupleAndKeywords(args, kwds, "ii:wmplugin:set_rpt_mode",
 	                                 kwlist, &id, &rpt_mode)) {
 		return NULL;
