@@ -23,7 +23,8 @@
 //  ChangeLog:
 //  2008-04-14 Florian Krebs 
 //  * adapt wiimote external for the actual version of cwiid (0.6.00)
-
+//  2009-11-05 Robert Künnemann
+//  * code clean ups, depencency on cwiid_internal removed
 
 #include <stdio.h>
 #include <unistd.h>
@@ -31,7 +32,9 @@
 #include <bluetooth/bluetooth.h>
 #include <m_pd.h>
 #include <math.h>
-#include </cwiid-0.6.00/cwiid_internal.h>
+#include <cwiid.h>
+//#include <cwiid_internal.h> //get rid of this, if possible
+
 #define PI	3.14159265358979323
 
 struct acc {
@@ -52,7 +55,7 @@ typedef struct _wiimote
 	cwiid_wiimote_t *wiimote; // individual wiimote handle per pd object, represented in libcwiid
 
 	t_float connected;
-	int wiimoteID;
+	int listID;
 	
 	t_float toggle_acc, toggle_ir, toggle_nc;
 
@@ -78,13 +81,6 @@ typedef struct _wiimote
 	
 } t_wiimote;
 
-
-
-
-// For now, we make one global t_wiimote pointer that we can refer to
-// in the cwiid_callback. This means we can support maximum of ONE
-// wiimote. ARGH. We'll have to figure out how to have access to the
-// pd object from the callback (without modifying the CWiid code):
 #define MAX_WIIMOTES 8
 t_wiimote *g_wiimoteList[MAX_WIIMOTES];
 
@@ -93,8 +89,8 @@ t_wiimote *g_wiimoteList[MAX_WIIMOTES];
 void cwiid_debug(t_wiimote *x)
 {
 	post("\n======================");
-	if (x->connected) post("Wiimote (id: %d) is connected.", x->wiimoteID);
-	else post("Wiimote (id: %d) is NOT connected.", x->wiimoteID);
+	if (x->connected) post("Wiimote (id: %d) is connected.", x->listID);
+	else post("Wiimote (id: %d) is NOT connected.", x->listID);
 	if (x->toggle_acc) post("acceleration: ON");
 	else post("acceleration: OFF");
 	if (x->toggle_ir)  post("IR:           ON");
@@ -229,17 +225,23 @@ void cwiid_nunchuk(t_wiimote *x, struct cwiid_nunchuk_mesg *mesg)
 
 /*void cwiid_callback(cwiid_wiimote_t *wiimt, int mesg_count, union cwiid_mesg *mesg[], struct timespec *timestamp)
 */
+
 void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
                     union cwiid_mesg mesg_array[], struct timespec *timestamp)
 {
 	unsigned char buf[7];
 	int i;
 	t_wiimote *x;
-	if (g_wiimoteList[wiimote->id] == NULL) {
-		post("no wiimote loaded: %d%",wiimote->id);
+	
+	int wiimote_id=0;
+
+	wiimote_id = cwiid_get_id(wiimote);
+
+	if (g_wiimoteList[wiimote_id] == NULL) {
+		post("no wiimote loaded: %d%",wiimote_id);
 	}
 	else {	
-		x = g_wiimoteList[wiimote->id];
+		x = g_wiimoteList[wiimote_id];
 			
 		for (i=0; i < mesg_count; i++)
 		{	
@@ -395,62 +397,27 @@ void cwiid_doConnect(t_wiimote *x, t_symbol *addr)
 		post("Connecting to given address...");
 		post("Press buttons 1 and 2 simultaneously.");
 		} 
-	// bdaddr = *BDADDR_ANY;
+
 	// connect:
-	if (g_wiimoteList[0]==NULL) {
-		post("open: Connect wiimote 0");		
-		x->wiimote = cwiid_open(&bdaddr,CWIID_FLAG_MESG_IFC);
-		x->wiimoteID = 0;
-		x->wiimote->id =0;
-		g_wiimoteList[0] = x;
-		
-
-	}
-
-	else if (g_wiimoteList[1]==NULL) {
-		post("open: Connect wiimote 1");
-		x->wiimote = cwiid_open(&bdaddr, CWIID_FLAG_MESG_IFC);
-		x->wiimoteID = 1;
-		x->wiimote->id = 1;
-		g_wiimoteList[1] = x;
-	}
 	
-/*	
-	else if (g_wiimoteList[2]==NULL) {
-		x->wiimote = cwiid_open(bdaddr, 0);
-		x->wiimoteID = 2;
-		g_wiimoteList[2] = x;
+	//search for next free item in list
+	int i;
+	for(i=0; i < MAX_WIIMOTES; i++) 
+	{
+		if (g_wiimoteList[i]==NULL) {
+			post("open: Connect wiimote %d", i);		
+			x->wiimote = cwiid_open(&bdaddr,CWIID_FLAG_MESG_IFC);
+			x->listID = i;
+			g_wiimoteList[i] = x;
+			break;
+		}
+		else if( i == MAX_WIIMOTES -1)
+		{
+			post("Error: The maximum number of wiimotes has been reached.");
+			return;
+		}
 	}
-	else if (g_wiimoteList[3]==NULL) {
-		x->wiimote = cwiid_open(bdaddr, 0);
-		x->wiimoteID = 3;
-		g_wiimoteList[3] = x;
-	}
-	else if (g_wiimoteList[4]==NULL) {
-		x->wiimote = cwiid_open(bdaddr, 0);
-		x->wiimoteID = 4;
-		g_wiimoteList[4] = x;
-	}
-	else if (g_wiimoteList[5]==NULL) {
-		x->wiimote = cwiid_open(bdaddr, 0);
-		x->wiimoteID = 5;
-		g_wiimoteList[5] = x;
-	}
-	else if (g_wiimoteList[6]==NULL) {
-		x->wiimote = cwiid_open(bdaddr, 0);
-		x->wiimoteID = 6;
-		g_wiimoteList[6] = x;
-	}
-	else if (g_wiimoteList[7]==NULL) {
-		x->wiimote = cwiid_open(bdaddr, 0);
-		x->wiimoteID = 7;
-		g_wiimoteList[7] = x;
-	}
-	else {
-		post("Error: The maximum number of wiimotes has been reached.");
-		return;
-	}
-	*/
+
 	if (x->wiimote == NULL) {
 		post("wiimote error: unable to connect");
 	} else {
@@ -483,7 +450,7 @@ void cwiid_doConnect(t_wiimote *x, t_symbol *addr)
 void cwiid_discover(t_wiimote *x)
 {
 	post("Put the wiimote into discover mode by pressing buttons 1 and 2 simultaneously.");
-		
+
 	cwiid_doConnect(x, gensym("NULL"));
 	if (!(x->connected))
 	{
@@ -493,7 +460,7 @@ void cwiid_discover(t_wiimote *x)
 
 void cwiid_doDisconnect(t_wiimote *x)
 {
-		
+
 	if (x->connected)
 	{
 		if (cwiid_close(x->wiimote)) {
@@ -501,12 +468,12 @@ void cwiid_doDisconnect(t_wiimote *x)
 		} 
 		else {
 			post("disconnect successfull, resetting values");
-			g_wiimoteList[x->wiimoteID] = NULL;
+			g_wiimoteList[x->listID] = NULL;
 			x->connected = 0;
 		}
 	}
 	else post("device is not connected");
-	
+
 }
 
 
@@ -517,7 +484,7 @@ static void *cwiid_new(t_symbol* s, int argc, t_atom *argv)
 {
 	bdaddr_t bdaddr; // wiimote bdaddr
 	t_wiimote *x = (t_wiimote *)pd_new(cwiid_class);
-	
+
 	// create outlets:
 	x->outlet_btn = outlet_new(&x->x_obj, &s_list);
 	x->outlet_acc = outlet_new(&x->x_obj, &s_list);
@@ -532,10 +499,10 @@ static void *cwiid_new(t_symbol* s, int argc, t_atom *argv)
 	x->toggle_nc = 0;
 
 	x->connected = 0;
-	x->wiimoteID = -1;
-	
-		// connect if user provided an address as an argument:
-		
+	x->listID = -1;
+
+	// connect if user provided an address as an argument:
+
 	if (argc==2)
 	{
 		post("conecting to provided address...");
@@ -547,12 +514,6 @@ static void *cwiid_new(t_symbol* s, int argc, t_atom *argv)
 			return NULL;
 		}
 	}
-	
-	
-
-	
-	
-
 	return (x);
 }
 
@@ -566,7 +527,7 @@ void wiimote_setup(void)
 {
 	int i;
 	for (i=0; i<MAX_WIIMOTES; i++) g_wiimoteList[i] = NULL;
-	
+
 	cwiid_class = class_new(gensym("wiimote"), (t_newmethod)cwiid_new, (t_method)cwiid_free, sizeof(t_wiimote), CLASS_DEFAULT, A_GIMME, 0);
 	class_addmethod(cwiid_class, (t_method) cwiid_debug, gensym("debug"), 0);
 	class_addmethod(cwiid_class, (t_method) cwiid_doConnect, gensym("connect"), A_SYMBOL, 0);
@@ -578,8 +539,6 @@ void wiimote_setup(void)
 	class_addmethod(cwiid_class, (t_method) cwiid_reportIR, gensym("reportIR"), A_DEFFLOAT, 0);
 	class_addmethod(cwiid_class, (t_method) cwiid_setRumble, gensym("setRumble"), A_DEFFLOAT, 0);
 	class_addmethod(cwiid_class, (t_method) cwiid_setLED, gensym("setLED"), A_DEFFLOAT, 0);
-	
-
 }
 
 

@@ -9,7 +9,8 @@ PD_PATH=/usr/lib/pd
 #include ../../../makefile.include
 
 # specify the path to CWiid:
-CWIID_PATH = $(ASCAPE_PATH)/usr/lib
+#CWIID_PATH = $(ASCAPE_PATH)/usr/lib
+CWIID_PATH = ../libcwiid
 
 
 ######################################################
@@ -39,7 +40,7 @@ pd_linux: $(NAME).pd_linux
 .SUFFIXES: .pd_linux
 
 LINUXCFLAGS = -DPD -O2 -funroll-loops -fomit-frame-pointer \
-    -W -Wshadow -Wstrict-prototypes \
+    -W -Wshadow -Wstrict-prototypes -fPIC \
     -Wno-unused -Wno-parentheses -Wno-switch
 
 .c.pd_linux:
@@ -51,7 +52,7 @@ LINUXCFLAGS = -DPD -O2 -funroll-loops -fomit-frame-pointer \
 install:
 
 ifdef ASCAPE_INSTALLED
-	-cp *help*.pd $(ASCAPE_PATH)/ss_engine/pd/help/.
+	-cp doc/*help*.pd $(ASCAPE_PATH)/ss_engine/pd/help/.
 ifeq ($(findstring Linux,$(ASCAPE_OS)),Linux)
 	-cp *.pd_linux $(ASCAPE_PATH)/ss_engine/pd/externs/$(ASCAPE_OS)$(ASCAPE_ARCH)/.
 endif
@@ -61,7 +62,7 @@ endif
 endif
 	
 	-cp *.pd_linux $(PD_EXTRA_PATH)/.
-	-cp *help*.pd $(PD_DOC_PATH)/.
+	-cp doc/*help*.pd $(PD_DOC_PATH)/.
 
 clean:
 	-rm -f *.o *.pd_* so_locations

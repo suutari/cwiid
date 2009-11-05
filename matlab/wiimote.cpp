@@ -237,6 +237,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
 			if(nrhs == 2)
 			{
 				/*TODO convert string into bluetooth adress.. */
+				// str2ba(mxArrayToString(prhs[1]), &bdaddr);
 			}
 			else if (nrhs == 1) /* if none is given */
 			{
