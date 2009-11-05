@@ -21,11 +21,11 @@ CWIID_PATH = ../libcwiid
 ifdef PD_PATH
 PD_INCLUDE := -I$(PD_PATH)/src
 PD_EXTRA_PATH := $(PD_PATH)/extra
-PD_DOC_PATH := $(PD_PATH)/doc
+PD_DOC_PATH := $(PD_PATH)/doc/5.reference
 else
 PD_INCLUDE := -I/usr/local/include
 PD_EXTRA_PATH := /usr/local/lib/pd/extra
-PD_DOC_PATH := /usr/local/lib/pd/doc
+PD_DOC_PATH := /usr/local/lib/pd/doc/5.reference
 endif
 
 		
