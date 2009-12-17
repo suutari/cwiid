@@ -48,6 +48,7 @@
 /* Wiimote specific magic numbers */
 #define WIIMOTE_NAME "Nintendo RVL-CNT-01"
 #define WIIBALANCE_NAME "Nintendo RVL-WBC-01"
+#define NYKOWAND_NAME "Nintendo RVL-CNT-01 Compatible"
 #define WIIMOTE_CLASS_0 0x04
 #define WIIMOTE_CLASS_1 0x25
 #define WIIMOTE_CLASS_2 0x00
