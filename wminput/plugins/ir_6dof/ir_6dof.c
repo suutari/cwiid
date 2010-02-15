@@ -27,6 +27,7 @@ static struct wmplugin_info info;
 static struct wmplugin_data data;
 
 static struct acc_cal acc_cal;
+static struct acc_cal motionplus_cal;
 
 static int plugin_id;
 
@@ -34,10 +35,11 @@ wmplugin_info_t wmplugin_info;
 wmplugin_init_t wmplugin_init;
 wmplugin_exec_t wmplugin_exec;
 static void process_acc(struct cwiid_acc_mesg *mesg);
+static void process_motionplus(struct cwiid_motionplus_mesg *mesg);
 
 static float Yaw_Scale = 1.0;
-static float Roll_Scale = 1.0;
-static float Pitch_Scale = 1.0;
+static float Roll_Scale = 5.0;
+static float Pitch_Scale = 10.0;
 static float X_Scale = 1.0;
 static float Y_Scale = 1.0;
 static float Z_Scale = 1.0;
@@ -82,13 +84,25 @@ struct wmplugin_info *wmplugin_info() {
         info.axis_info[5].min  = -16;
         info.axis_info[5].fuzz = 0;
         info.axis_info[5].flat = 0;
-        info.param_count = 4;
+        info.param_count = 6;
         info.param_info[0].name = "X_Scale";
         info.param_info[0].type = WMPLUGIN_PARAM_FLOAT;
         info.param_info[0].ptr = &X_Scale;
         info.param_info[1].name = "Y_Scale";
         info.param_info[1].type = WMPLUGIN_PARAM_FLOAT;
         info.param_info[1].ptr = &Y_Scale;
+		info.param_info[2].name = "Z_Scale";
+        info.param_info[2].type = WMPLUGIN_PARAM_FLOAT;
+        info.param_info[2].ptr = &Z_Scale;
+        info.param_info[3].name = "Roll_Scale";
+        info.param_info[3].type = WMPLUGIN_PARAM_FLOAT;
+        info.param_info[3].ptr = &Roll_Scale;
+		info.param_info[4].name = "Yaw_Scale";
+        info.param_info[4].type = WMPLUGIN_PARAM_FLOAT;
+        info.param_info[4].ptr = &Yaw_Scale;
+        info.param_info[5].name = "Pitch_Scale";
+        info.param_info[5].type = WMPLUGIN_PARAM_FLOAT;
+        info.param_info[5].ptr = &Pitch_Scale;
 
 		info_init = 1;
 	}
@@ -102,12 +116,27 @@ int wmplugin_init(int id, cwiid_wiimote_t *wiimote)
 	data.buttons = 0;
 	data.axes[0].valid = 1;
 	data.axes[1].valid = 1;
-	if (wmplugin_set_rpt_mode(id, CWIID_RPT_ACC)) {
+	data.axes[2].valid = 1;
+	data.axes[3].valid = 1;
+	data.axes[4].valid = 1;
+	data.axes[5].valid = 1;
+
+	if (wmplugin_set_rpt_mode(id, CWIID_RPT_ACC | CWIID_RPT_MOTIONPLUS | CWIID_RPT_IR)) {
+		return -1;
+	}
+
+	if(cwiid_enable(wiimote, CWIID_FLAG_MOTIONPLUS)) {
+		wmplugin_err(id, "You need wiimotion plus to run this plugin");
+		return -1;
+	}
+
+	if(cwiid_get_acc_cal(wiimote, CWIID_EXT_MOTIONPLUS, &motionplus_cal)){
+		wmplugin_err(id, "motionplus calibration error");
 		return -1;
 	}
 
 	if (cwiid_get_acc_cal(wiimote, CWIID_EXT_NONE, &acc_cal)) {
-		wmplugin_err(id, "calibration error");
+		wmplugin_err(id, "accelerometers calibration error");
 		return -1;
 	}
 
@@ -120,11 +149,16 @@ struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg mesg[])
 	struct wmplugin_data *ret = NULL;
 
 	for (i=0; i < mesg_count; i++) {
+		//printf("%i",mesg[i].type);
 		switch (mesg[i].type) {
 		case CWIID_MESG_ACC:
 			process_acc(&mesg[i].acc_mesg);
 			ret = &data;
 			break;
+		case CWIID_MESG_MOTIONPLUS:
+			process_motionplus(&mesg[i].motionplus_mesg);
+			ret = &data;
+		break;
 		default:
 			break;
 		}
@@ -140,7 +174,7 @@ double a_x = 0, a_y = 0, a_z = 0;
 static void process_acc(struct cwiid_acc_mesg *mesg)
 {
 	double a;
-	double roll, pitch;
+	double roll, pitch; //These are the absolute roll yaw and pitch not the commands.
 
 	a_x = (((double)mesg->acc[CWIID_X] - acc_cal.zero[CWIID_X]) /
 	      (acc_cal.one[CWIID_X] - acc_cal.zero[CWIID_X]))*NEW_AMOUNT +
@@ -160,28 +194,39 @@ static void process_acc(struct cwiid_acc_mesg *mesg)
 
 	pitch = atan(a_y/a_z*cos(roll));
 
-	data.axes[3].value = roll  * 1000 * Roll_Scale;
-	data.axes[4].value = pitch * 1000 * Pitch_Scale;
-
+	//Don't move unless you have enough motion
 	if ((a > 0.85) && (a < 1.15)) {
 		if ((fabs(roll)*(180/PI) > 10) && (fabs(pitch)*(180/PI) < 80)) {
-			data.axes[0].valid = 1;
-			data.axes[0].value = roll * 5 * X_Scale;
+			data.axes[3].valid = 1;
+			data.axes[3].value = roll * 5 * X_Scale;
 		}
 		else {
-			data.axes[0].valid = 0;
+			data.axes[3].valid = 0;
 		}
 		if (fabs(pitch)*(180/PI) > 10) {
-			data.axes[1].valid = 1;
-			data.axes[1].value = pitch * 10 * Y_Scale;
+			data.axes[5].valid = 1;
+			data.axes[5].value = pitch * 10 * Y_Scale;
 		}
 		else {
-			data.axes[1].valid = 0;
+			data.axes[5].valid = 0;
 		}
 	}
 	else {
-		data.axes[0].valid = 0;
-		data.axes[1].valid = 0;
+		data.axes[3].valid = 0;
+		data.axes[5].valid = 0;
 	}
+}
+
+static void process_motionplus(struct cwiid_motionplus_mesg *mesg)
+{
+	double roll, yaw, pitch;
+	roll = mesg->angle_rate[0];
+	yaw	= -(mesg->angle_rate[1]-motionplus_cal.zero[1])/(motionplus_cal.one[1]-motionplus_cal.zero[1]);
+	pitch = mesg->angle_rate[2];
+
+	data.axes[4].valid=1;
+	data.axes[4].value+=yaw/1000;
+//	printf("%g\t%g\n",yaw,(double)mesg->angle_rate[1]);
+
 }
 

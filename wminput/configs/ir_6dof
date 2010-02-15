@@ -2,10 +2,10 @@
 
 include buttons
 
-Plugin.ir_6dof.X	= REL_X
-Plugin.ir_6dof.Y	= REL_Y
+#Plugin.ir_6dof.X	= REL_X
+#Plugin.ir_6dof.Y	= REL_Y
 #Plugin.ir_6dof.Z	= REL_Z
-#Plugin.ir_6dof.phi	= REL_PHI
-#Plugin.ir_6dof.theta= REL_THETA
-#Plugin.ir_6dof.psi	= REL_PSI
+#Plugin.ir_6dof.Roll	= REL_X
+Plugin.ir_6dof.Yaw		= REL_X
+Plugin.ir_6dof.Pitch	= REL_Y
 
