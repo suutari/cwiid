@@ -163,6 +163,10 @@ struct acc_cal {
 	uint8_t one[3];
 };
 
+struct motionplus_cal {
+	uint16_t zero[3];
+};
+
 struct balance_cal {
 	uint16_t right_top[3];
 	uint16_t right_bottom[3];
@@ -338,6 +342,8 @@ int cwiid_get_mesg(cwiid_wiimote_t *wiimote, int *mesg_count,
                    union cwiid_mesg *mesg[], struct timespec *timestamp);
 int cwiid_get_state(cwiid_wiimote_t *wiimote, struct cwiid_state *state);
 int cwiid_get_acc_cal(struct wiimote *wiimote, enum cwiid_ext_type ext_type,
+                      struct acc_cal *acc_cal);
+int cwiid_get_gyro_cal(struct wiimote *wiimote, enum cwiid_ext_type ext_type,
                       struct acc_cal *acc_cal);
 int cwiid_get_balance_cal(struct wiimote *wiimote,
                           struct balance_cal *balance_cal);

@@ -170,11 +170,6 @@ int cwiid_get_acc_cal(cwiid_wiimote_t *wiimote, enum cwiid_ext_type ext_type,
 		offset = 0xA40020;
 		err_str = "nunchuk ";
 		break;
-	case CWIID_EXT_MOTIONPLUS:
-		flags = CWIID_RW_REG;
-		offset = 0xA40008;
-		err_str = "motionplus ";
-		break;
 	default:
 		cwiid_err(wiimote, "Unsupported calibration request");
 		return -1;

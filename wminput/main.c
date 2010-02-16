@@ -51,7 +51,7 @@ int wminput_set_report_mode();
 void process_btn_mesg(struct cwiid_btn_mesg *mesg);
 void process_nunchuk_mesg(struct cwiid_nunchuk_mesg *mesg);
 void process_classic_mesg(struct cwiid_classic_mesg *mesg);
-void process_plugin(struct plugin *, int, union cwiid_mesg []);
+void process_plugin(struct plugin *, int, union cwiid_mesg [], struct timespec *timestamp);
 
 /* Globals */
 cwiid_wiimote_t *wiimote;
@@ -426,7 +426,7 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 		}
 	}
 	for (i=0; (i < CONF_MAX_PLUGINS) && conf.plugins[i].name; i++) {
-		process_plugin(&conf.plugins[i], mesg_count, mesg);
+		process_plugin(&conf.plugins[i], mesg_count, mesg, timestamp);
 	}
 	send_event(&conf, EV_SYN, SYN_REPORT, 0);
 }
@@ -645,7 +645,7 @@ void process_classic_mesg(struct cwiid_classic_mesg *mesg)
 }
 
 void process_plugin(struct plugin *plugin, int mesg_count,
-                    union cwiid_mesg mesg[])
+                    union cwiid_mesg mesg[], struct timespec *timestamp)
 {
 	static union cwiid_mesg plugin_mesg[CWIID_MAX_MESG_COUNT];
 	int plugin_mesg_count = 0;
@@ -689,7 +689,7 @@ void process_plugin(struct plugin *plugin, int mesg_count,
 	if (plugin_mesg_count > 0) {
 		switch (plugin->type) {
 		case PLUGIN_C:
-			if (c_plugin_exec(plugin, plugin_mesg_count, plugin_mesg)) {
+			if (c_plugin_exec(plugin, plugin_mesg_count, plugin_mesg, timestamp)) {
 				return;
 			}
 			break;

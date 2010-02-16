@@ -75,7 +75,7 @@ struct wmplugin_data {
 
 typedef struct wmplugin_info *wmplugin_info_t(void);
 typedef int wmplugin_init_t(int, cwiid_wiimote_t *);
-typedef struct wmplugin_data *wmplugin_exec_t(int, union cwiid_mesg []);
+typedef struct wmplugin_data *wmplugin_exec_t(int, union cwiid_mesg [], struct timespec *timestamp);
 
 int wmplugin_set_rpt_mode(int id, uint8_t rpt_mode);
 void wmplugin_err(int id, char *str, ...);
