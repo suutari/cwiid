@@ -18,7 +18,7 @@ fi
 AC_ARG_WITH(
 	[python],
 	[AS_HELP_STRING([--without-python],[compile without python support])],
-	[case $withval in 
+	[case $withval in
 		yes)
 			REQUIRE_PYTHON=1
 			PYTHON_NAME=python
@@ -89,9 +89,11 @@ else
 fi
 AC_SUBST(CWIID_PLUGINS_DIR)
 
-AC_ARG_WITH(ldconfig,AC_HELP_STRING([--disable-ldconfig],
-	[don't execute ldconfig after install]))
-if test "$enable_ldconfig" = "no"; then
+AC_ARG_ENABLE(
+	[ldconfig],
+	[AC_HELP_STRING([--disable-ldconfig],[don't execute ldconfig after install])],
+	[disable_ldconfig=yes])
+if test "$disable_ldconfig" = "yes"; then
 	LDCONFIG="#ldconfig"
 else
 	LDCONFIG="ldconfig"
