@@ -100,10 +100,28 @@ else
 fi
 AC_SUBST(LDCONFIG)
 
-pkg_modules="gtk+-2.0 >= 2.0.0 gthread-2.0"
-PKG_CHECK_MODULES([GTK], [$pkg_modules])
-AC_SUBST(GTK_CFLAGS)
-AC_SUBST(GTK_LIBS)
+AC_ARG_WITH(
+	[gtk],
+	[AS_HELP_STRING([--without-gtk],[compile without GTK UI])],
+	[case $withval in
+		yes)
+			WANT_GTK=yes
+		;;
+		no)
+			WANT_GTK=
+		;;
+		*)
+			WANT_GTK=yes
+		;;
+	esac],
+	[WANT_GTK=yes])
+AC_SUBST(WANT_GTK)
+if test "$WANT_GTK" = "yes"; then
+	pkg_modules="gtk+-2.0 >= 2.0.0 gthread-2.0"
+	PKG_CHECK_MODULES([GTK], [$pkg_modules],,[AC_MSG_ERROR([Cannot find gtk+ >= 2.0.0, try --without-gtk])])
+	AC_SUBST(GTK_CFLAGS)
+	AC_SUBST(GTK_LIBS)
+fi
 
 AC_OUTPUT(
 	[Makefile]

@@ -21,6 +21,7 @@ AWK = @AWK@
 LEX = @LEX@
 YACC = @YACC@
 PYTHON = @PYTHON@
+GTK = @WANT_GTK@
 
 COMMON = @abs_top_builddir@/common
 
