@@ -1,6 +1,6 @@
 #Copyright (C) 2007 L. Donnie Smith
 
-include @top_builddir@/defs.mak
+include @top_builddir@defs.mak
 
 LIB_DIRS = libcwiid
 BIN_DIRS = wmgui wminput lswm

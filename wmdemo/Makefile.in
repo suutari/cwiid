@@ -6,7 +6,7 @@ APP_NAME = wmdemo
 
 SOURCES = wmdemo.c
 
-CFLAGS += -I@top_builddir@/libcwiid
+CFLAGS += -I@top_srcdir@/libcwiid
 LDFLAGS += -L@top_builddir@/libcwiid
 LDLIBS += -lcwiid
 INST_DIR = @bindir@
