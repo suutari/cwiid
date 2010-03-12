@@ -1,6 +1,8 @@
 AC_INIT(CWiid,0.6.00,donnie.smith@gatech.edu)
 AC_CONFIG_HEADER(common/include/config.h)
 
+AC_CONFIG_SRCDIR(libcwiid/cwiid.h)
+
 AC_PROG_CC
 AC_PROG_AWK
 AC_PROG_LEX
@@ -18,7 +20,7 @@ fi
 AC_ARG_WITH(
 	[python],
 	[AS_HELP_STRING([--without-python],[compile without python support])],
-	[case $withval in 
+	[case $withval in
 		yes)
 			REQUIRE_PYTHON=1
 			PYTHON_NAME=python
@@ -123,4 +125,3 @@ AC_OUTPUT(
 	[lswm/Makefile]
 	[python/Makefile]
 	)
-

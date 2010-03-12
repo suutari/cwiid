@@ -28,7 +28,7 @@ endif
 
 SOURCES += $(LAST_SOURCES)
 
-include $(COMMON)/include/app.mak
+include $(APPINC)
 
 all install clean distclean uninstall: make_plugins
 

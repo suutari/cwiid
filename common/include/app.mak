@@ -23,7 +23,7 @@ uninstall:
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),distclean)
-include $(COMMON)/include/dep.mak
+include $(DEPINC)
 -include $(DEPS)
 endif
 endif
