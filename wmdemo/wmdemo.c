@@ -315,6 +315,8 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 	int i, j;
 	int valid_source;
 
+	(void)timestamp;
+
 	for (i=0; i < mesg_count; i++)
 	{
 		switch (mesg[i].type) {

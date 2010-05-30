@@ -44,6 +44,8 @@ int process_status(struct wiimote *wiimote, const unsigned char *data,
 {
 	struct cwiid_status_mesg status_mesg;
 
+	(void)ma;
+
 	status_mesg.type = CWIID_MESG_STATUS;
 	status_mesg.battery = data[5];
 	if (data[2] & 0x02) {
@@ -179,6 +181,8 @@ int process_ext(struct wiimote *wiimote, unsigned char *data,
 	struct cwiid_balance_mesg *balance_mesg;
 	struct cwiid_motionplus_mesg *motionplus_mesg;
 	int i;
+
+	(void)len;
 
 	switch (wiimote->state.ext_type) {
 	case CWIID_EXT_NONE:

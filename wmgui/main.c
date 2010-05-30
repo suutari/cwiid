@@ -826,6 +826,8 @@ void drawStick_expose_event(GtkWidget *drawStick, GdkEventExpose *event,
 {
 	gint width, height;
 
+	(void)event;
+
 	gdk_window_get_geometry(drawStick->window, NULL, NULL, &width, &height,
 	                        NULL);
 	gdk_draw_arc(drawStick->window,
@@ -1040,6 +1042,8 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 	char *ext_str;
 	static enum cwiid_ext_type ext_type = CWIID_EXT_NONE;
 
+	(void)timestamp;
+
 	gdk_threads_enter();
 	for (i=0; i < mesg_count; i++) {
 		switch (mesg_array[i].type) {
@@ -1066,6 +1070,8 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 			case CWIID_EXT_CLASSIC:
 				ext_str = "Classic controller";
 				break;
+			case CWIID_EXT_BALANCE:
+				ext_str = "Balance Board";
 			case CWIID_EXT_MOTIONPLUS:
 				ext_str = "MotionPlus";
 				break;

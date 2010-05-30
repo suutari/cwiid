@@ -154,6 +154,17 @@ PyTypeObject Wiimote_Type = {
 	(initproc)Wiimote_init,	/* tp_init */
 	0,						/* tp_alloc */
 	Wiimote_new,			/* tp_new */
+	0,						/* tp_free */
+	0,						/* tp_is_gc */
+	0,						/* tp_bases */
+	0,						/* tp_mro */
+	0,						/* tp_cache */
+	0,						/* tp_subclasses */
+	0,						/* tp_weaklist */
+	0,						/* tp_del */
+#if PY_VERSION_HEX <= 02060000
+	0,						/* tp_version_tag */
+#endif
 };
 
 /* Allocate and deallocate functions */
@@ -161,6 +172,9 @@ static PyObject *
 	Wiimote_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
 	Wiimote* self;
+
+	(void)args;
+	(void)kwds;
 
 	if (!(self = (Wiimote *) type->tp_alloc(type, 0))) {
 		return NULL;
@@ -307,6 +321,8 @@ static int
 {
 	PyObject *OldCallback;
 
+	(void)closure;
+
 	if (!self->wiimote) {
 		SET_CLOSED_ERROR;
 		return -1;
@@ -373,6 +389,8 @@ static PyObject *Wiimote_get_state(Wiimote* self, void *closure)
 {
 	struct cwiid_state state;
 	PyObject *PyState;
+
+	(void)closure;
 
 	if (!self->wiimote) {
 		SET_CLOSED_ERROR;
@@ -677,6 +695,8 @@ static int Wiimote_set_led(Wiimote *self, PyObject *PyLed, void *closure)
 {
 	long led;
 
+	(void)closure;
+
 	if (!self->wiimote) {
 		SET_CLOSED_ERROR;
 		return -1;
@@ -700,6 +720,8 @@ static int
 {
 	long rumble;
 
+	(void)closure;
+
 	if (!self->wiimote) {
 		SET_CLOSED_ERROR;
 		return -1;
@@ -722,6 +744,8 @@ static int
 	Wiimote_set_rpt_mode(Wiimote *self, PyObject *PyRptMode, void *closure)
 {
 	long rpt_mode;
+
+	(void)closure;
 
 	if (!self->wiimote) {
 		SET_CLOSED_ERROR;

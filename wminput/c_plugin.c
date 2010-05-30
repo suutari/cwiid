@@ -169,6 +169,8 @@ void wmplugin_err(int id, char *str, ...)
 {
 	va_list ap;
 
+	(void)id;
+
 	va_start(ap, str);
 	vfprintf(stderr, str, ap);
 	fprintf(stderr, "\n");

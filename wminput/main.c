@@ -77,6 +77,8 @@ void print_usage(void)
 
 void cwiid_err_connect(struct wiimote *wiimote, const char *str, va_list ap)
 {
+	(void)wiimote;
+
 	/* TODO: temporary kludge to stifle error messages from cwiid_open */
 	if (errno != EHOSTDOWN) {
 		vfprintf(stderr, str, ap);
@@ -404,6 +406,9 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
                     union cwiid_mesg mesg[], struct timespec *timestamp)
 {
 	int i;
+
+	(void)wiimote;
+	(void)timestamp;
 
 	for (i=0; i < mesg_count; i++) {
 		switch (mesg[i].type) {
