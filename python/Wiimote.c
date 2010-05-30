@@ -59,6 +59,7 @@ static PyObject *Wiimote_get_state(Wiimote *self, void *closure);
 static PyObject *Wiimote_get_acc_cal(Wiimote *self, PyObject *args,
                                      PyObject *kwds);
 static PyObject *Wiimote_get_balance_cal(Wiimote *self);
+static PyObject *Wiimote_get_id(Wiimote *self);
 
 static PyObject *Wiimote_request_status(Wiimote *self);
 static int Wiimote_set_led(Wiimote *self, PyObject *PyLed, void *closure);
@@ -111,6 +112,7 @@ static PyGetSetDef Wiimote_GetSet[] = {
 	{"rumble", NULL, (setter)Wiimote_set_rumble, "Wiimote rumble state", NULL},
 	{"rpt_mode", NULL, (setter)Wiimote_set_rpt_mode, "Wiimote report mode",
 	 NULL},
+    {"id", (getter)Wiimote_get_id, NULL, "Wiimote id (assigned by cwiid)", NULL},
 	{NULL, NULL, NULL, NULL, NULL}
 };
 
@@ -367,6 +369,16 @@ static PyObject *Wiimote_get_mesg(Wiimote *self)
 	free(mesg);
 
 	return PyMesg;
+}
+
+static PyObject *Wiimote_get_id(Wiimote* self)
+{
+	if (!self->wiimote) {
+		SET_CLOSED_ERROR;
+		return NULL;
+	}
+
+    return PyInt_FromLong(cwiid_get_id(self->wiimote));
 }
 
 static PyObject *Wiimote_get_state(Wiimote* self, void *closure)
