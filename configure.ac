@@ -138,6 +138,8 @@ AC_OUTPUT(
 	[wminput/Makefile]
 	[wminput/plugins/Makefile]
 	[wminput/plugins/ir_ptr/Makefile]
+	[wminput/plugins/ir_6dof/Makefile]
+	[wminput/plugins/3dof/Makefile]
 	[wminput/plugins/acc/Makefile]
 	[wminput/plugins/nunchuk_acc/Makefile]
 	[wminput/plugins/led/Makefile]

@@ -125,10 +125,10 @@ int c_plugin_init(struct plugin *plugin, int id)
 }
 
 int c_plugin_exec(struct plugin *plugin, int mesg_count,
-                   union cwiid_mesg mesg[])
+                   union cwiid_mesg mesg[], struct timespec *timestamp)
 {
 	if (!(plugin->data = ((struct c_plugin *)plugin->p)->exec(mesg_count,
-	                                                          mesg))) {
+	                                                          mesg, timestamp))) {
 		return -1;
 	}
 
