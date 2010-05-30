@@ -103,6 +103,7 @@ int wmplugin_init(int id, cwiid_wiimote_t *arg_wiimote)
 
 struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg mesg[], struct timespec *timestamp)
 {
+   (void) timestamp;
 	int i;
 	enum cwiid_ext_type ext_type = CWIID_EXT_NONE;
 	struct wmplugin_data *ret = NULL;

@@ -72,6 +72,7 @@ int wmplugin_init(int id, cwiid_wiimote_t *arg_wiimote)
 
 struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg mesg[], struct timespec *timestamp)
 {
+   (void) timestamp;
 	static int src_index = -1;
 	static int debounce = 0;
 	//static uint8_t old_flag;

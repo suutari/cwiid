@@ -70,6 +70,7 @@ int wmplugin_init(int id, cwiid_wiimote_t *arg_wiimote)
 
 struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg mesg[], struct timespec *timestamp)
 {
+   (void) timestamp;
 	int i;
 	uint8_t button;
 	struct cwiid_btn_mesg *btn_mesg;
