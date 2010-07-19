@@ -93,12 +93,12 @@ int process_acc(struct wiimote *wiimote, const unsigned char *data,
 	if (wiimote->state.rpt_mode & CWIID_RPT_ACC) {
 		acc_mesg = &ma->array[ma->count++].acc_mesg;
 		acc_mesg->type = CWIID_MESG_ACC;
-		acc_mesg->acc[CWIID_X] = ((uint16_t)data[3] << 2) |
-                               ((uint16_t)data[0] & ((1<<6) | (1<<5)));
-		acc_mesg->acc[CWIID_Y] = ((uint16_t)data[4] << 2) |
-                               ((uint16_t)data[1] & (1<<5));
-		acc_mesg->acc[CWIID_Z] = ((uint16_t)data[5] << 2) |
-                               ((uint16_t)data[1] & (1<<6));
+		acc_mesg->acc[CWIID_X] = ((uint16_t)data[2] << 2) |
+                  (((uint16_t)data[0] & (3<<5)) >> 5);
+		acc_mesg->acc[CWIID_Y] = ((uint16_t)data[3] << 2) |
+                  (((uint16_t)data[1] & (1<<5)) >> 4);
+		acc_mesg->acc[CWIID_Z] = ((uint16_t)data[4] << 2) |
+                   (((uint16_t)data[1] & (1<<6)) >> 5);
 	}
 
 	return 0;
@@ -200,11 +200,11 @@ int process_ext(struct wiimote *wiimote, unsigned char *data,
 			nunchuk_mesg->stick[CWIID_X] = data[0];
 			nunchuk_mesg->stick[CWIID_Y] = data[1];
 			nunchuk_mesg->acc[CWIID_X]   = ((uint16_t)data[2]<<2) |
-                                        ((uint16_t)data[5] & ((1<<2) + (1<<3)));
+                          (((uint16_t)data[5] & (3 << 2)) >> 2);
 			nunchuk_mesg->acc[CWIID_Y]   = ((uint16_t)data[3]<<2) |
-                                        ((uint16_t)data[5] & ((1<<4) + (1<<5)));
+                          (((uint16_t)data[5] & (3 << 4)) >> 4);
 			nunchuk_mesg->acc[CWIID_Z]   = ((uint16_t)data[4]<<2) |
-                                        ((uint16_t)data[5] & ((1<<6) + (1<<7)));
+                          (((uint16_t)data[5] & (3 << 6)) >> 6);
 			nunchuk_mesg->buttons = ~data[5] & NUNCHUK_BTN_MASK;
 		}
 		break;
@@ -268,11 +268,11 @@ int process_ext(struct wiimote *wiimote, unsigned char *data,
             nunchuk_mesg->stick[CWIID_X] = data[0];
             nunchuk_mesg->stick[CWIID_Y] = data[1];
             nunchuk_mesg->acc[CWIID_X]   = ((uint16_t)data[2]<<2) |
-                                           (((uint16_t)data[5] & (1<<4)) << 1);
+                                           (((uint16_t)data[5] & (1<<4)) >> 3);
             nunchuk_mesg->acc[CWIID_Y]   = ((uint16_t)data[3]<<2) |
-                                           (((uint16_t)data[5] & (1<<5)) << 1);
-            nunchuk_mesg->acc[CWIID_Z]   = ((uint16_t)data[4]<<2) |
-                                           ((uint16_t)data[5] & ((1<<6) + (1<<7)));
+                                           (((uint16_t)data[5] & (1<<5)) >> 4);
+            nunchuk_mesg->acc[CWIID_Z]   = ((uint16_t)(data[4] & ~1)<<2) |
+                                           ((uint16_t)data[5] & (3<<6)) >> 5;
             nunchuk_mesg->buttons = ~((data[5] & (1<<3 | 1<<2)) >> 2);
          }
 		}

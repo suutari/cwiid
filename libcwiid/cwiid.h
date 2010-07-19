@@ -101,7 +101,7 @@
 #define CWIID_PSI	2
 
 /* Acc Defs */
-#define CWIID_ACC_MAX	0xFF
+#define CWIID_ACC_MAX	0x3FF
 
 /* IR Defs */
 #define CWIID_IR_SRC_COUNT	4
@@ -159,8 +159,8 @@ enum cwiid_error {
 };
 
 struct acc_cal {
-	uint8_t zero[3];
-	uint8_t one[3];
+	uint16_t zero[3];
+	uint16_t one[3];
 };
 
 struct motionplus_cal {
