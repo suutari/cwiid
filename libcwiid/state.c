@@ -86,6 +86,32 @@ int update_state(struct wiimote *wiimote, struct mesg_array *ma)
 			       mesg->motionplus_mesg.low_speed,
 			       sizeof wiimote->state.ext.motionplus.low_speed);
 			break;
+		case CWIID_MESG_GUITAR:
+			memcpy(wiimote->state.ext.guitar.stick,
+			       mesg->guitar_mesg.stick,
+			       sizeof wiimote->state.ext.guitar.stick);
+			wiimote->state.ext.guitar.whammy = mesg->guitar_mesg.whammy;
+			wiimote->state.ext.guitar.touch_bar = mesg->guitar_mesg.touch_bar;
+			wiimote->state.ext.guitar.buttons = mesg->guitar_mesg.buttons;
+			break;
+		case CWIID_MESG_DRUMS:
+			memcpy(wiimote->state.ext.drums.stick,
+			       mesg->drums_mesg.stick,
+			       sizeof wiimote->state.ext.drums.stick);
+			wiimote->state.ext.drums.velocity = mesg->drums_mesg.velocity;
+			wiimote->state.ext.drums.velocity_source = mesg->drums_mesg.velocity_source;
+			wiimote->state.ext.drums.buttons = mesg->drums_mesg.buttons;
+			break;
+		case CWIID_MESG_TURNTABLES:
+			memcpy(wiimote->state.ext.turntables.stick,
+			       mesg->turntables_mesg.stick,
+			       sizeof wiimote->state.ext.turntables.stick);
+			wiimote->state.ext.turntables.crossfader = mesg->turntables_mesg.crossfader;
+			wiimote->state.ext.turntables.effect_dial = mesg->turntables_mesg.effect_dial;
+			wiimote->state.ext.turntables.left_turntable = mesg->turntables_mesg.left_turntable;
+			wiimote->state.ext.turntables.right_turntable = mesg->turntables_mesg.right_turntable;
+			wiimote->state.ext.turntables.buttons = mesg->turntables_mesg.buttons;
+			break;
 		case CWIID_MESG_ERROR:
 			wiimote->state.error = mesg->error_mesg.error;
 			break;
@@ -155,9 +181,12 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t rpt_mode)
 
 	/* Pick a report mode based on report flags */
 	if ((rpt_mode & CWIID_RPT_EXT) &&
-	  ((wiimote->state.ext_type == CWIID_EXT_NUNCHUK) ||
-	   (wiimote->state.ext_type == CWIID_EXT_CLASSIC) ||
-	   (wiimote->state.ext_type == CWIID_EXT_MOTIONPLUS))) {
+	    ((wiimote->state.ext_type == CWIID_EXT_NUNCHUK) ||
+	     (wiimote->state.ext_type == CWIID_EXT_CLASSIC) ||
+	     (wiimote->state.ext_type == CWIID_EXT_MOTIONPLUS) ||
+	     (wiimote->state.ext_type == CWIID_EXT_GUITAR) ||
+	     (wiimote->state.ext_type == CWIID_EXT_DRUMS) ||
+	     (wiimote->state.ext_type == CWIID_EXT_TURNTABLES))) {
 		if ((rpt_mode & CWIID_RPT_IR) && (rpt_mode & CWIID_RPT_ACC)) {
 			rpt_type = RPT_BTN_ACC_IR10_EXT6;
 			ir_enable_seq = ir_enable10_seq;
@@ -245,6 +274,18 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t rpt_mode)
 	}
 	else if ((wiimote->state.ext_type == CWIID_EXT_MOTIONPLUS) &&
 	  (CWIID_RPT_MOTIONPLUS & ~rpt_mode & wiimote->state.rpt_mode)) {
+		memset(&wiimote->state.ext, 0, sizeof wiimote->state.ext);
+	}
+	else if ((wiimote->state.ext_type == CWIID_EXT_GUITAR) &&
+	  (CWIID_RPT_GUITAR & ~rpt_mode & wiimote->state.rpt_mode)) {
+		memset(&wiimote->state.ext, 0, sizeof wiimote->state.ext);
+	}
+	else if ((wiimote->state.ext_type == CWIID_EXT_DRUMS) &&
+	  (CWIID_RPT_DRUMS & ~rpt_mode & wiimote->state.rpt_mode)) {
+		memset(&wiimote->state.ext, 0, sizeof wiimote->state.ext);
+	}
+	else if ((wiimote->state.ext_type == CWIID_EXT_TURNTABLES) &&
+	  (CWIID_RPT_TURNTABLES & ~rpt_mode & wiimote->state.rpt_mode)) {
 		memset(&wiimote->state.ext, 0, sizeof wiimote->state.ext);
 	}
 

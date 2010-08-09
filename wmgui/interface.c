@@ -61,6 +61,7 @@ create_winMain (void)
   GtkWidget *menuHelp_menu;
   GtkWidget *menuAbout;
   GtkWidget *hbox1;
+
   GtkWidget *frame1;
   GtkWidget *alignment1;
   GtkWidget *table1;
@@ -98,6 +99,7 @@ create_winMain (void)
   GtkWidget *evUp;
   GtkWidget *lblUp;
   GtkWidget *label1;
+
   GtkWidget *frame2;
   GtkWidget *alignment2;
   GtkWidget *hbox2;
@@ -118,11 +120,13 @@ create_winMain (void)
   GtkWidget *progAccZ;
   GtkWidget *progAccY;
   GtkWidget *progAccX;
+
   GtkWidget *frame3;
   GtkWidget *drawIR;
   GtkWidget *lblIR;
   GtkWidget *label2;
   GtkWidget *hbox10;
+
   GtkWidget *frame4;
   GtkWidget *alignment28;
   GtkWidget *hbox12;
@@ -150,6 +154,7 @@ create_winMain (void)
   GtkWidget *lblNCAccY;
   GtkWidget *lblNCAccX;
   GtkWidget *lblNC;
+
   GtkWidget *frame5;
   GtkWidget *alignment29;
   GtkWidget *vbox5;
@@ -206,6 +211,7 @@ create_winMain (void)
   GtkWidget *lblCCRVal;
   GtkWidget *lblCCLVal;
   GtkWidget *lblClassic;
+
   GtkWidget *frame6;
   GtkWidget *alignment8;
   GtkWidget *table2;
@@ -225,6 +231,38 @@ create_winMain (void)
   GtkWidget *evMPPsiSlow;
   GtkWidget *lblMPPsiSlow;
   GtkWidget *lblMotionPlus;
+
+  GtkWidget *frame7;
+  GtkWidget *hbox14;
+  GtkWidget *hbox16;
+  GtkWidget *lblGuitar;
+  GtkWidget *evGHGUp;
+  GtkWidget *evGHGDown;
+  GtkWidget *evGHGPlus;
+  GtkWidget *evGHGMinus;
+  GtkWidget *evGHGGreen;
+  GtkWidget *evGHGRed;
+  GtkWidget *evGHGYellow;
+  GtkWidget *evGHGBlue;
+  GtkWidget *evGHGOrange;
+  GtkWidget *drawGHGStick;
+  GtkWidget *progGHGWhammy;
+  GtkWidget *progGHGTouchBar;
+  GtkWidget *lblGHGUp;
+  GtkWidget *lblGHGDown;
+  GtkWidget *lblGHGPlus;
+  GtkWidget *lblGHGMinus;
+  GtkWidget *lblGHGGreen;
+  GtkWidget *lblGHGRed;
+  GtkWidget *lblGHGYellow;
+  GtkWidget *lblGHGBlue;
+  GtkWidget *lblGHGOrange;
+  GtkWidget *lblGHGStick;
+  GtkWidget *lblGHGWhammy;
+  GtkWidget *lblGHGWhammyVal;
+  GtkWidget *lblGHGTouchBar;
+  GtkWidget *lblGHGTouchBarVal;
+
   GtkWidget *hbox11;
   GtkWidget *statConnection;
   GtkWidget *statBattery;
@@ -1505,6 +1543,118 @@ create_winMain (void)
   gtk_frame_set_label_widget (GTK_FRAME (frame6), lblMotionPlus);
   gtk_label_set_use_markup (GTK_LABEL (lblMotionPlus), TRUE);
 
+
+
+  hbox14 = gtk_hbox_new (TRUE, 0);
+  gtk_widget_set_name (hbox14, "hbox14");
+  gtk_widget_show (hbox14);
+  gtk_box_pack_start (GTK_BOX (vbox1), hbox14, FALSE, FALSE, 0);
+
+  frame7 = gtk_frame_new (NULL);
+  gtk_widget_set_name (frame7, "frame7");
+  gtk_widget_show (frame7);
+  gtk_box_pack_start (GTK_BOX (hbox14), frame7, TRUE, TRUE, 3);
+
+  lblGuitar = gtk_label_new ("<b>Guitar</b>");
+  gtk_widget_set_name (lblGuitar, "lblGuitar");
+  gtk_widget_show (lblGuitar);
+  gtk_frame_set_label_widget (GTK_FRAME (frame7), lblGuitar);
+  gtk_label_set_use_markup (GTK_LABEL (lblGuitar), TRUE);
+
+  hbox16 = gtk_hbox_new (TRUE, 0);
+  gtk_widget_set_name (hbox16, "hbox16");
+  gtk_widget_show (hbox16);
+  gtk_container_add (GTK_CONTAINER (frame7), hbox16);
+
+  evGHGDown = gtk_event_box_new ();
+  gtk_widget_set_name (evGHGDown, "evGHGDown");
+  gtk_widget_show (evGHGDown);
+  gtk_box_pack_start (GTK_BOX (hbox16), evGHGDown, TRUE, TRUE, 0);
+
+  lblGHGDown = gtk_label_new ("Down");
+  gtk_widget_set_name (lblGHGDown, "lblGHGDown");
+  gtk_widget_show (lblGHGDown);
+  gtk_container_add (GTK_CONTAINER (evGHGDown), lblGHGDown);
+
+  evGHGUp = gtk_event_box_new ();
+  gtk_widget_set_name (evGHGUp, "evGHGUp");
+  gtk_widget_show (evGHGUp);
+  gtk_box_pack_start (GTK_BOX (hbox16), evGHGUp, TRUE, TRUE, 0);
+
+  lblGHGUp = gtk_label_new ("Up");
+  gtk_widget_set_name (lblGHGUp, "lblGHGUp");
+  gtk_widget_show (lblGHGUp);
+  gtk_container_add (GTK_CONTAINER (evGHGUp), lblGHGUp);
+
+  evGHGGreen = gtk_event_box_new ();
+  gtk_widget_set_name (evGHGGreen, "evGHGGreen");
+  gtk_widget_show (evGHGGreen);
+  gtk_box_pack_start (GTK_BOX (hbox16), evGHGGreen, TRUE, TRUE, 0);
+
+  lblGHGGreen = gtk_label_new ("green");
+  gtk_widget_set_name (lblGHGGreen, "lblGHGGreen");
+  gtk_widget_show (lblGHGGreen);
+  gtk_container_add (GTK_CONTAINER (evGHGGreen), lblGHGGreen);
+
+  evGHGRed = gtk_event_box_new ();
+  gtk_widget_set_name (evGHGRed, "evGHGRed");
+  gtk_widget_show (evGHGRed);
+  gtk_box_pack_start (GTK_BOX (hbox16), evGHGRed, TRUE, TRUE, 0);
+
+  lblGHGRed = gtk_label_new ("Red");
+  gtk_widget_set_name (lblGHGRed, "lblGHGRed");
+  gtk_widget_show (lblGHGRed);
+  gtk_container_add (GTK_CONTAINER (evGHGRed), lblGHGRed);
+
+
+  evGHGYellow = gtk_event_box_new ();
+  gtk_widget_set_name (evGHGYellow, "evGHGYellow");
+  gtk_widget_show (evGHGYellow);
+  gtk_box_pack_start (GTK_BOX (hbox16), evGHGYellow, TRUE, TRUE, 0);
+
+  lblGHGYellow = gtk_label_new ("Yellow");
+  gtk_widget_set_name (lblGHGYellow, "lblGHGYellow");
+  gtk_widget_show (lblGHGYellow);
+  gtk_container_add (GTK_CONTAINER (evGHGYellow), lblGHGYellow);
+
+
+  evGHGBlue = gtk_event_box_new ();
+  gtk_widget_set_name (evGHGBlue, "evGHGBlue");
+  gtk_widget_show (evGHGBlue);
+  gtk_box_pack_start (GTK_BOX (hbox16), evGHGBlue, TRUE, TRUE, 0);
+
+  lblGHGBlue = gtk_label_new ("Blue");
+  gtk_widget_set_name (lblGHGBlue, "lblGHGBlue");
+  gtk_widget_show (lblGHGBlue);
+  gtk_container_add (GTK_CONTAINER (evGHGBlue), lblGHGBlue);
+
+
+  evGHGOrange = gtk_event_box_new ();
+  gtk_widget_set_name (evGHGOrange, "evGHGOrange");
+  gtk_widget_show (evGHGOrange);
+  gtk_box_pack_start (GTK_BOX (hbox16), evGHGOrange, TRUE, TRUE, 0);
+
+  lblGHGOrange = gtk_label_new ("Orange");
+  gtk_widget_set_name (lblGHGOrange, "lblGHGOrange");
+  gtk_widget_show (lblGHGOrange);
+  gtk_container_add (GTK_CONTAINER (evGHGOrange), lblGHGOrange);
+
+/* template
+  evGHG_XXX = gtk_event_box_new ();
+  gtk_widget_set_name (evGHG_XXX, "evGHG_XXX");
+  gtk_widget_show (evGHG_XXX);
+  gtk_box_pack_start (GTK_BOX (hbox16), evGHG_XXX, TRUE, TRUE, 0);
+
+  lblGHG_XXX = gtk_label_new ("_XXX");
+  gtk_widget_set_name (lblGHG_XXX, "lblGHG_XXX");
+  gtk_widget_show (lblGHG_XXX);
+  gtk_container_add (GTK_CONTAINER (evGHG_XXX), lblGHG_XXX);
+*/
+
+
+
+
+
   hbox11 = gtk_hbox_new (TRUE, 0);
   gtk_widget_set_name (hbox11, "hbox11");
   gtk_widget_show (hbox11);
@@ -1725,6 +1875,36 @@ create_winMain (void)
   GLADE_HOOKUP_OBJECT (winMain, evMPPsiSlow, "evMPPsiSlow");
   GLADE_HOOKUP_OBJECT (winMain, lblMPPsiSlow, "lblMPPsiSlow");
   GLADE_HOOKUP_OBJECT (winMain, lblMotionPlus, "lblMotionPlus");
+
+  GLADE_HOOKUP_OBJECT (winMain, lblGuitar, "lblGuitar");
+  GLADE_HOOKUP_OBJECT (winMain, evGHGUp, "evGHGUp");
+  GLADE_HOOKUP_OBJECT (winMain, evGHGDown, "evGHGDown");
+  GLADE_HOOKUP_OBJECT (winMain, evGHGGreen, "evGHGGreen");
+  GLADE_HOOKUP_OBJECT (winMain, evGHGRed, "evGHGRed");
+  GLADE_HOOKUP_OBJECT (winMain, evGHGYellow, "evGHGYellow");
+  GLADE_HOOKUP_OBJECT (winMain, evGHGBlue, "evGHGBlue");
+  GLADE_HOOKUP_OBJECT (winMain, evGHGOrange, "evGHGOrange");
+/*
+  GLADE_HOOKUP_OBJECT (winMain, evGHGPlus, "evGHGPlus");
+  GLADE_HOOKUP_OBJECT (winMain, evGHGMinus, "evGHGMinus");
+  GLADE_HOOKUP_OBJECT (winMain, drawGHGStick, "drawGHGStick");
+  GLADE_HOOKUP_OBJECT (winMain, progGHGWhammy, "progGHGWhammy");
+  GLADE_HOOKUP_OBJECT (winMain, progGHGTouchBar, "progGHGTouchBar");
+  GLADE_HOOKUP_OBJECT (winMain, lblGHGUp, "lblGHGUp");
+  GLADE_HOOKUP_OBJECT (winMain, lblGHGDown, "lblGHGDown");
+  GLADE_HOOKUP_OBJECT (winMain, lblGHGPlus, "lblGHGPlus");
+  GLADE_HOOKUP_OBJECT (winMain, lblGHGMinus, "lblGHGMinus");
+  GLADE_HOOKUP_OBJECT (winMain, lblGHGGreen, "lblGHGGreen");
+  GLADE_HOOKUP_OBJECT (winMain, lblGHGRed, "lblGHGRed");
+  GLADE_HOOKUP_OBJECT (winMain, lblGHGYellow, "lblGHGYellow");
+  GLADE_HOOKUP_OBJECT (winMain, lblGHGBlue, "lblGHGBlue");
+  GLADE_HOOKUP_OBJECT (winMain, lblGHGOrange, "lblGHGOrange");
+  GLADE_HOOKUP_OBJECT (winMain, lblGHGStick, "lblGHGStick");
+  GLADE_HOOKUP_OBJECT (winMain, lblGHGWhammy, "lblGHGWhammy");
+  GLADE_HOOKUP_OBJECT (winMain, lblGHGWhammyVal, "lblGHGWhammyVal");
+  GLADE_HOOKUP_OBJECT (winMain, lblGHGTouchBar, "lblGHGTouchBar");
+  GLADE_HOOKUP_OBJECT (winMain, lblGHGTouchBarVal, "lblGHGTouchBarVal");
+*/
   GLADE_HOOKUP_OBJECT (winMain, hbox11, "hbox11");
   GLADE_HOOKUP_OBJECT (winMain, statConnection, "statConnection");
   GLADE_HOOKUP_OBJECT (winMain, statBattery, "statBattery");

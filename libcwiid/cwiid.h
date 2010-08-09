@@ -40,8 +40,11 @@
 #define CWIID_RPT_CLASSIC		0x20
 #define CWIID_RPT_BALANCE		0x40
 #define CWIID_RPT_MOTIONPLUS	0x80
+#define CWIID_RPT_GUITAR		0x100
+#define CWIID_RPT_DRUMS			0x200
+#define CWIID_RPT_TURNTABLES	0x400
 #define CWIID_RPT_EXT		(CWIID_RPT_NUNCHUK | CWIID_RPT_CLASSIC | \
-                             CWIID_RPT_BALANCE | CWIID_RPT_MOTIONPLUS)
+                             CWIID_RPT_BALANCE | CWIID_RPT_MOTIONPLUS | CWIID_RPT_GUITAR | CWIID_RPT_DRUMS | CWIID_RPT_TURNTABLES)
 
 /* LED flags */
 #define CWIID_LED1_ON	0x01
@@ -81,6 +84,34 @@
 #define CWIID_CLASSIC_BTN_DOWN	0x4000
 #define CWIID_CLASSIC_BTN_RIGHT	0x8000
 
+#define CWIID_GUITAR_BTN_UP 	0x0001
+#define CWIID_GUITAR_BTN_YELLOW	0x0008
+#define CWIID_GUITAR_BTN_GREEN	0x0010
+#define CWIID_GUITAR_BTN_BLUE	0x0020
+#define CWIID_GUITAR_BTN_RED	0x0040
+#define CWIID_GUITAR_BTN_ORANGE	0x0080
+#define CWIID_GUITAR_BTN_PLUS	0x0400
+#define CWIID_GUITAR_BTN_MINUS	0x1000
+#define CWIID_GUITAR_BTN_DOWN	0x4000
+
+#define CWIID_DRUMS_VELOCITY_PEDAL	0xB6
+#define CWIID_DRUMS_VELOCITY_PEDAL2	0x36
+#define CWIID_DRUMS_VELOCITY_RED	0xB2
+#define CWIID_DRUMS_VELOCITY_YELLOW	0xA2
+#define CWIID_DRUMS_VELOCITY_BLUE	0x9E
+#define CWIID_DRUMS_VELOCITY_ORANGE	0x9C
+#define CWIID_DRUMS_VELOCITY_GREEN	0xA4
+
+#define CWIID_TURNTABLES_BTN_RIGHT_BLUE 	0x0004
+#define CWIID_TURNTABLES_BTN_LEFT_GREEN 	0x0008
+#define CWIID_TURNTABLES_BTN_EUPHORIA		0x0010
+#define CWIID_TURNTABLES_BTN_RIGHT_GREEN	0x0020
+#define CWIID_TURNTABLES_BTN_LEFT_BLUE		0x0080
+#define CWIID_TURNTABLES_BTN_RIGHT_RED		0x0200
+#define CWIID_TURNTABLES_BTN_PLUS		0x0400
+#define CWIID_TURNTABLES_BTN_MINUS		0x1000
+#define CWIID_TURNTABLES_BTN_LEFT_RED		0x2000
+
 /* Send Report flags */
 #define CWIID_SEND_RPT_NO_RUMBLE    0x01
 
@@ -116,6 +147,26 @@
 #define CWIID_CLASSIC_R_STICK_MAX	0x1F
 #define CWIID_CLASSIC_LR_MAX	0x1F
 
+/* Guitar Maxes */
+#define CWIID_GUITAR_STICK_MAX	0x3F
+#define CWIID_GUITAR_TOUCH_BAR_MAX	0x1F
+#define CWIID_GUITAR_WHAMMY_MAX	0x0F
+
+#define CWIID_GUITAR_TOUCHBAR_VALUE_NONE		0x0F
+#define CWIID_GUITAR_TOUCHBAR_VALUE_1ST			0x04
+#define CWIID_GUITAR_TOUCHBAR_VALUE_1ST_AND_2ND		0x06
+#define CWIID_GUITAR_TOUCHBAR_VALUE_2ND			0x0A
+#define CWIID_GUITAR_TOUCHBAR_VALUE_2ND_AND_3RD		0x0C
+#define CWIID_GUITAR_TOUCHBAR_VALUE_3RD			0x12
+#define CWIID_GUITAR_TOUCHBAR_VALUE_3RD_AND_4TH		0x14
+#define CWIID_GUITAR_TOUCHBAR_VALUE_4TH			0x16
+#define CWIID_GUITAR_TOUCHBAR_VALUE_4TH_AND_5TH		0x19
+#define CWIID_GUITAR_TOUCHBAR_VALUE_5TH			0x1F
+
+/* Turntables maxes */
+#define CWIID_TURNTABLES_STICK_MAX 0x3F
+
+
 /* Environment Variables */
 #define WIIMOTE_BDADDR	"WIIMOTE_BDADDR"
 
@@ -139,6 +190,9 @@ enum cwiid_mesg_type {
 	CWIID_MESG_CLASSIC,
 	CWIID_MESG_BALANCE,
 	CWIID_MESG_MOTIONPLUS,
+	CWIID_MESG_GUITAR,
+	CWIID_MESG_DRUMS,
+	CWIID_MESG_TURNTABLES,
 	CWIID_MESG_ERROR,
 	CWIID_MESG_UNKNOWN
 };
@@ -149,6 +203,9 @@ enum cwiid_ext_type {
 	CWIID_EXT_CLASSIC,
 	CWIID_EXT_BALANCE,
 	CWIID_EXT_MOTIONPLUS,
+	CWIID_EXT_GUITAR,
+	CWIID_EXT_DRUMS,
+	CWIID_EXT_TURNTABLES,
 	CWIID_EXT_UNKNOWN
 };
 
@@ -156,6 +213,30 @@ enum cwiid_error {
 	CWIID_ERROR_NONE,
 	CWIID_ERROR_DISCONNECT,
 	CWIID_ERROR_COMM
+};
+
+enum cwiid_guitar_touchbar_states {
+	CWIID_GUITAR_TOUCHBAR_NONE,
+	CWIID_GUITAR_TOUCHBAR_1ST,
+	CWIID_GUITAR_TOUCHBAR_1ST_AND_2ND,
+	CWIID_GUITAR_TOUCHBAR_2ND,
+	CWIID_GUITAR_TOUCHBAR_2ND_AND_3RD,
+	CWIID_GUITAR_TOUCHBAR_3RD,
+	CWIID_GUITAR_TOUCHBAR_3RD_AND_4TH,
+	CWIID_GUITAR_TOUCHBAR_4TH,
+	CWIID_GUITAR_TOUCHBAR_4TH_AND_5TH,
+	CWIID_GUITAR_TOUCHBAR_5TH
+};
+
+enum cwiid_drums_velocity_sources {
+	CWIID_DRUMS_VELOCITY_SOURCE_NONE,
+	CWIID_DRUMS_VELOCITY_SOURCE_PEDAL,
+	CWIID_DRUMS_VELOCITY_SOURCE_PEDAL2,
+	CWIID_DRUMS_VELOCITY_SOURCE_RED,
+	CWIID_DRUMS_VELOCITY_SOURCE_YELLOW,
+	CWIID_DRUMS_VELOCITY_SOURCE_BLUE,
+	CWIID_DRUMS_VELOCITY_SOURCE_ORANGE,
+	CWIID_DRUMS_VELOCITY_SOURCE_GREEN
 };
 
 struct acc_cal {
@@ -233,6 +314,32 @@ struct cwiid_motionplus_mesg {
    uint8_t extension;
 };
 
+struct cwiid_guitar_mesg {
+	enum cwiid_mesg_type type;
+	uint8_t stick[2];
+	uint8_t whammy;
+	enum cwiid_guitar_touchbar_states touch_bar;
+	uint16_t buttons;
+};
+
+struct cwiid_drums_mesg {
+	enum cwiid_mesg_type type;
+	uint8_t stick[2];
+	uint8_t velocity;
+	enum cwiid_drums_velocity_sources velocity_source;
+	uint16_t buttons;
+};
+
+struct cwiid_turntables_mesg {
+	enum cwiid_mesg_type type;
+	uint8_t stick[2];
+	uint8_t crossfader;
+	uint8_t effect_dial;
+	int8_t left_turntable;
+	int8_t right_turntable;
+	uint16_t buttons;
+};
+
 struct cwiid_error_mesg {
 	enum cwiid_mesg_type type;
 	enum cwiid_error error;
@@ -248,6 +355,9 @@ union cwiid_mesg {
 	struct cwiid_classic_mesg classic_mesg;
 	struct cwiid_balance_mesg balance_mesg;
 	struct cwiid_motionplus_mesg motionplus_mesg;
+	struct cwiid_guitar_mesg guitar_mesg;
+	struct cwiid_drums_mesg drums_mesg;
+	struct cwiid_turntables_mesg turntables_mesg;
 	struct cwiid_error_mesg error_mesg;
 };
 
@@ -283,16 +393,42 @@ struct motionplus_state {
       struct classic_state classic;
    } ext;
 };
+struct guitar_state {
+	uint8_t stick[2];
+	uint8_t whammy;
+	enum  cwiid_guitar_touchbar_states touch_bar;
+	uint16_t buttons;
+};
+
+struct drums_state {
+	uint8_t stick[2];
+	uint8_t velocity;
+	enum cwiid_drums_velocity_sources velocity_source;
+	uint16_t buttons;
+};
+
+struct turntables_state {
+	uint8_t stick[2];
+	uint8_t crossfader;
+	uint8_t effect_dial;
+	int8_t left_turntable;
+	int8_t right_turntable;
+	uint16_t buttons;
+};
+
 
 union ext_state {
 	struct nunchuk_state nunchuk;
 	struct classic_state classic;
 	struct balance_state balance;
 	struct motionplus_state motionplus;
+	struct guitar_state guitar;
+	struct drums_state drums;
+	struct turntables_state turntables;
 };
 
 struct cwiid_state {
-	uint8_t rpt_mode;
+	uint16_t rpt_mode;
 	uint8_t led;
 	uint8_t rumble;
 	uint8_t battery;
@@ -364,7 +500,7 @@ int cwiid_send_rpt(cwiid_wiimote_t *wiimote, uint8_t flags, uint8_t report,
 int cwiid_request_status(cwiid_wiimote_t *wiimote);
 int cwiid_set_led(cwiid_wiimote_t *wiimote, uint8_t led);
 int cwiid_set_rumble(cwiid_wiimote_t *wiimote, uint8_t rumble);
-int cwiid_set_rpt_mode(cwiid_wiimote_t *wiimote, uint8_t rpt_mode);
+int cwiid_set_rpt_mode(cwiid_wiimote_t *wiimote, uint16_t rpt_mode);
 int cwiid_read(cwiid_wiimote_t *wiimote, uint8_t flags, uint32_t offset,
                uint16_t len, void *data);
 int cwiid_write(cwiid_wiimote_t *wiimote, uint8_t flags, uint32_t offset,
