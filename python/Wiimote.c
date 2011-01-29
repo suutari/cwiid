@@ -162,7 +162,7 @@ PyTypeObject Wiimote_Type = {
 	0,						/* tp_subclasses */
 	0,						/* tp_weaklist */
 	0,						/* tp_del */
-#if PY_VERSION_HEX <= 02060000
+#if PY_VERSION_HEX >= 0x02060000
 	0,						/* tp_version_tag */
 #endif
 };
