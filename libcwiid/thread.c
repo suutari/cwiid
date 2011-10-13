@@ -16,6 +16,7 @@
  *
  */
 
+#include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,7 +39,7 @@ void *router_thread(struct wiimote *wiimote)
 		ma.count = 0;
 		if (clock_gettime(CLOCK_REALTIME, &ma.timestamp)) {
 			if (print_clock_err) {
-				cwiid_err(wiimote, "clock_gettime error");
+				cwiid_err(wiimote, "clock_gettime error: %s", strerror(errno));
 				print_clock_err = 0;
 			}
 		}
@@ -149,7 +150,7 @@ void *status_thread(struct wiimote *wiimote)
 	while (1) {
 		if (full_read(wiimote->status_pipe[0], status_mesg,
 		              sizeof *status_mesg)) {
-			cwiid_err(wiimote, "Pipe read error (status)");
+			cwiid_err(wiimote, "Pipe read error (status): %s", strerror(errno));
 			/* Quit! */
 			break;
 		}
@@ -248,6 +249,7 @@ void *mesg_callback_thread(struct wiimote *wiimote)
 	cwiid_mesg_callback_t *callback = wiimote->mesg_callback;
 	struct mesg_array ma;
 	int cancelstate;
+	int err;
 
 	while (1) {
 		if (read_mesg_array(mesg_pipe, &ma)) {
@@ -258,12 +260,14 @@ void *mesg_callback_thread(struct wiimote *wiimote)
 		/* TODO: The callback can still be called once after disconnect,
 		 * although it's very unlikely.  User must keep track and avoid
 		 * accessing the wiimote struct after disconnect. */
-		if (pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cancelstate)) {
-			cwiid_err(wiimote, "Cancel state disable error (callback thread)");
+		err = pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cancelstate);
+		if (err) {
+			cwiid_err(wiimote, "Cancel state disable error (callback thread): %s", strerror(errno));
 		}
 		callback(wiimote, ma.count, ma.array, &ma.timestamp);
-		if (pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &cancelstate)) {
-			cwiid_err(wiimote, "Cancel state restore error (callback thread)");
+		err = pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &cancelstate);
+		if (err) {
+			cwiid_err(wiimote, "Cancel state restore error (callback thread): %s", strerror(errno));
 		}
 	}
 

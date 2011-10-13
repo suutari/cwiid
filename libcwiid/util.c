@@ -62,7 +62,7 @@ int verify_handshake(struct wiimote *wiimote)
 {
 	unsigned char handshake;
 	if (read(wiimote->ctl_socket, &handshake, 1) != 1) {
-		cwiid_err(wiimote, "Socket read error (handshake)");
+		cwiid_err(wiimote, "Socket read error (handshake): %s", strerror(errno));
 		return -1;
 	}
 	else if ((handshake & BT_TRANS_MASK) != BT_TRANS_HANDSHAKE) {
@@ -128,21 +128,21 @@ int write_mesg_array(struct wiimote *wiimote, struct mesg_array *ma)
 		if (errno == EAGAIN) {
 			cwiid_err(wiimote, "Mesg pipe overflow");
 			if (fcntl(wiimote->mesg_pipe[1], F_SETFL, 0)) {
-				cwiid_err(wiimote, "File control error (mesg pipe)");
+				cwiid_err(wiimote, "File control error (mesg pipe): %s", strerror(errno));
 				ret = -1;
 			}
 			else {
 				if (write(wiimote->mesg_pipe[1], ma, len) != len) {
-					cwiid_err(wiimote, "Pipe write error (mesg pipe)");
+					cwiid_err(wiimote, "Pipe write error (mesg pipe): %s", strerror(errno));
 					ret = -1;
 				}
 				if (fcntl(wiimote->mesg_pipe[1], F_SETFL, O_NONBLOCK)) {
-					cwiid_err(wiimote, "File control error (mesg pipe");
+					cwiid_err(wiimote, "File control error (mesg pipe): %s", strerror(errno));
 				}
 			}
 		}
 		else {
-			cwiid_err(wiimote, "Pipe write error (mesg pipe)");
+			cwiid_err(wiimote, "Pipe write error (mesg pipe): %s", strerror(errno));
 			ret = -1;
 		}
 	}
@@ -175,7 +175,7 @@ int cancel_rw(struct wiimote *wiimote)
 
 	if (write(wiimote->rw_pipe[1], &rw_mesg, sizeof rw_mesg) !=
 	  sizeof rw_mesg) {
-		cwiid_err(wiimote, "Pipe write error (rw)");
+		cwiid_err(wiimote, "Pipe write error (rw): %s", strerror(errno));
 		return -1;
 	}
 
@@ -185,14 +185,17 @@ int cancel_rw(struct wiimote *wiimote)
 int cancel_mesg_callback(struct wiimote *wiimote)
 {
 	int ret = 0;
+	int err;
 
-	if (pthread_cancel(wiimote->mesg_callback_thread)) {
-		cwiid_err(wiimote, "Thread cancel error (callback thread)");
+	err = pthread_cancel(wiimote->mesg_callback_thread);
+	if (err) {
+		cwiid_err(wiimote, "Thread cancel error (callback thread): %s", strerror(err));
 		ret = -1;
 	}
 
-	if (pthread_detach(wiimote->mesg_callback_thread)) {
-		cwiid_err(wiimote, "Thread detach error (callback thread)");
+	err = pthread_detach(wiimote->mesg_callback_thread);
+	if (err) {
+		cwiid_err(wiimote, "Thread detach error (callback thread): %s", strerror(err));
 		ret = -1;
 	}
 

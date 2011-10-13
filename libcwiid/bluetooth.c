@@ -16,6 +16,7 @@
  *
  */
 
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <bluetooth/bluetooth.h>
@@ -57,7 +58,7 @@ int cwiid_get_bdinfo_array(int dev_id, unsigned int timeout, int max_bdinfo,
 	/* Open connection to Bluetooth Interface */
    sock = hci_open_dev( dev_id );
    if (sock < 0) {
-		cwiid_err(NULL, "Bluetooth interface open error");
+		cwiid_err(NULL, "Bluetooth interface open error: %s", strerror(errno));
 		err = 1;
 		goto CODA;
 	}
@@ -71,7 +72,7 @@ int cwiid_get_bdinfo_array(int dev_id, unsigned int timeout, int max_bdinfo,
 	}
    dev_count = hci_inquiry( dev_id, timeout, max_inquiry, NULL, &dev_list, IREQ_CACHE_FLUSH );
    if (dev_count < 0) {
-		cwiid_err(NULL, "Bluetooth device inquiry error");
+		cwiid_err(NULL, "Bluetooth device inquiry error: %s", strerror(errno));
 		err = 1;
 		goto CODA;
 	}
@@ -107,7 +108,7 @@ int cwiid_get_bdinfo_array(int dev_id, unsigned int timeout, int max_bdinfo,
 #if 0
 		if (hci_read_remote_name(sock, &dev_list[i].bdaddr, BT_NAME_LEN,
 		                         (*bdinfo)[bdinfo_count].name, 10000)) {
-			cwiid_err(NULL, "Bluetooth name read error");
+			cwiid_err(NULL, "Bluetooth name read error: %s", strerror(errno));
 			err = 1;
 			goto CODA;
 		}

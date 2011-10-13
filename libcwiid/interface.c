@@ -47,7 +47,7 @@ int cwiid_enable(cwiid_wiimote_t *wiimote, int flags)
 	if ((flags & CWIID_FLAG_NONBLOCK) &&
 	  !(wiimote->flags & CWIID_FLAG_NONBLOCK)) {
 		if (fcntl(wiimote->mesg_pipe[0], F_SETFL, O_NONBLOCK)) {
-			cwiid_err(wiimote, "File control error (mesg pipe)");
+			cwiid_err(wiimote, "File control error (mesg pipe): %s", strerror(errno));
 			return -1;
 		}
 	}
@@ -67,7 +67,7 @@ int cwiid_disable(cwiid_wiimote_t *wiimote, int flags)
 	if ((flags & CWIID_FLAG_NONBLOCK) &&
 	  (wiimote->flags & CWIID_FLAG_NONBLOCK)) {
 		if (fcntl(wiimote->mesg_pipe[0], F_SETFL, 0)) {
-			cwiid_err(wiimote, "File control error (mesg pipe)");
+			cwiid_err(wiimote, "File control error (mesg pipe): %s", strerror(errno));
 			return -1;
 		}
 	}
@@ -85,6 +85,8 @@ int cwiid_disable(cwiid_wiimote_t *wiimote, int flags)
 int cwiid_set_mesg_callback(cwiid_wiimote_t *wiimote,
                             cwiid_mesg_callback_t *callback)
 {
+	int err;
+
 	if (wiimote->mesg_callback) {
 		if (cancel_mesg_callback(wiimote)) {
 			/* prints it's own errors */
@@ -95,9 +97,10 @@ int cwiid_set_mesg_callback(cwiid_wiimote_t *wiimote,
 	wiimote->mesg_callback = callback;
 
 	if (wiimote->mesg_callback) {
-		if (pthread_create(&wiimote->mesg_callback_thread, NULL,
-		                  (void *(*)(void *))&mesg_callback_thread, wiimote)) {
-			cwiid_err(wiimote, "Thread creation error (callback thread)");
+		err = pthread_create(&wiimote->mesg_callback_thread, NULL,
+		                  (void *(*)(void *))&mesg_callback_thread, wiimote);
+		if (err) {
+			cwiid_err(wiimote, "Thread creation error (callback thread): %s", strerror(err));
 			return -1;
 		}
 	}
@@ -115,7 +118,7 @@ int cwiid_get_mesg(cwiid_wiimote_t *wiimote, int *mesg_count,
 			return -1;
 		}
 		else {
-			cwiid_err(wiimote, "Pipe read error (mesg_pipe)");
+			cwiid_err(wiimote, "Pipe read error (mesg_pipe): %s", strerror(errno));
 			return -1;
 		}
 	}
@@ -135,16 +138,20 @@ int cwiid_get_mesg(cwiid_wiimote_t *wiimote, int *mesg_count,
 
 int cwiid_get_state(cwiid_wiimote_t *wiimote, struct cwiid_state *state)
 {
-	if (pthread_mutex_lock(&wiimote->state_mutex)) {
-		cwiid_err(wiimote, "Mutex lock error (state mutex)");
+	int err;
+
+	err = pthread_mutex_lock(&wiimote->state_mutex);
+	if (err) {
+		cwiid_err(wiimote, "Mutex lock error (state mutex): %s", strerror(err));
 		return -1;
 	}
 
 	memcpy(state, &wiimote->state, sizeof *state);
 
-	if (pthread_mutex_unlock(&wiimote->state_mutex)) {
+	err = pthread_mutex_unlock(&wiimote->state_mutex);
+	if (err) {
 		cwiid_err(wiimote, "Mutex unlock error (state mutex) - "
-		                   "deadlock warning");
+		                   "deadlock warning: %s", strerror(err));
 		return -1;
 	}
 

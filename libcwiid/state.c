@@ -23,10 +23,12 @@
 int update_state(struct wiimote *wiimote, struct mesg_array *ma)
 {
 	int i;
+	int err;
 	union cwiid_mesg *mesg;
 
-	if (pthread_mutex_lock(&wiimote->state_mutex)) {
-		cwiid_err(wiimote, "Mutex lock error (state mutex)");
+	err = pthread_mutex_lock(&wiimote->state_mutex);
+	if (err) {
+		cwiid_err(wiimote, "Mutex lock error (state mutex): %s", strerror(err));
 		return -1;
 	}
 
@@ -95,9 +97,10 @@ int update_state(struct wiimote *wiimote, struct mesg_array *ma)
 		}
 	}
 
-	if (pthread_mutex_unlock(&wiimote->state_mutex)) {
+	err = pthread_mutex_unlock(&wiimote->state_mutex);
+	if (err) {
 		cwiid_err(wiimote, "Mutex unlock error (state mutex) - "
-		                   "deadlock warning");
+		                   "deadlock warning: %s", strerror(err));
 		return -1;
 	}
 
@@ -138,11 +141,13 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t rpt_mode)
 	uint8_t rpt_type;
 	struct write_seq *ir_enable_seq;
 	int seq_len;
+	int err;
 
 	/* rpt_mode = bitmask of requested report types */
 	/* rpt_type = report id sent to the wiimote */
-	if (pthread_mutex_lock(&wiimote->rpt_mutex)) {
-		cwiid_err(wiimote, "Mutex lock error (rpt mutex)");
+	err = pthread_mutex_lock(&wiimote->rpt_mutex);
+	if (err) {
+		cwiid_err(wiimote, "Mutex lock error (rpt mutex): %s", strerror(err));
 		return -1;
 	}
 
@@ -250,9 +255,10 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t rpt_mode)
 
 	wiimote->state.rpt_mode = rpt_mode;
 
-	if (pthread_mutex_unlock(&wiimote->rpt_mutex)) {
+	err = pthread_mutex_unlock(&wiimote->rpt_mutex);
+	if (err) {
 		cwiid_err(wiimote, "Mutex unlock error (rpt mutex) - "
-		          "deadlock warning");
+		          "deadlock warning: %s", strerror(err));
 		return -1;
 	}
 

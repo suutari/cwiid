@@ -16,6 +16,8 @@
  *
  */
 
+#include <errno.h>
+#include <string.h>
 #include <unistd.h>
 #include "cwiid_internal.h"
 
@@ -58,7 +60,7 @@ int process_status(struct wiimote *wiimote, const unsigned char *data,
 
 	if (write(wiimote->status_pipe[1], &status_mesg, sizeof status_mesg)
 	  != sizeof status_mesg) {
-		cwiid_err(wiimote, "Status pipe write error");
+		cwiid_err(wiimote, "Status pipe write error: %s", strerror(errno));
 		return -1;
 	}
 
@@ -298,7 +300,7 @@ int process_read(struct wiimote *wiimote, unsigned char *data)
 
 	if (write(wiimote->rw_pipe[1], &rw_mesg, sizeof rw_mesg) !=
 	  sizeof rw_mesg) {
-		cwiid_err(wiimote, "RW pipe write error");
+		cwiid_err(wiimote, "RW pipe write error: %s", strerror(errno));
 		return -1;
 	}
 
@@ -319,7 +321,7 @@ int process_write(struct wiimote *wiimote, unsigned char *data)
 
 	if (write(wiimote->rw_pipe[1], &rw_mesg, sizeof rw_mesg) !=
 	  sizeof rw_mesg) {
-		cwiid_err(wiimote, "RW pipe write error");
+		cwiid_err(wiimote, "RW pipe write error: %s", strerror(errno));
 		return -1;
 	}
 
