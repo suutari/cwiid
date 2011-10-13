@@ -46,6 +46,8 @@ cwiid_wiimote_t *cwiid_open_timeout(bdaddr_t *pbdaddr, int flags, int timeout)
 
    if (pbdaddr == NULL) {
       bdaddr = *BDADDR_ANY;
+   } else {
+      bdaddr = *pbdaddr;
    }
 
 	/* If BDADDR_ANY is given, find available wiimote */
