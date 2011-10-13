@@ -37,22 +37,19 @@ cwiid_wiimote_t *cwiid_open(bdaddr_t *bdaddr, int flags)
 	return cwiid_open_timeout(bdaddr, flags, DEFAULT_TIMEOUT);
 }
 
-cwiid_wiimote_t *cwiid_open_timeout(bdaddr_t *pbdaddr, int flags, int timeout)
+cwiid_wiimote_t *cwiid_open_timeout(bdaddr_t *bdaddr, int flags, int timeout)
 {
 	struct sockaddr_l2 remote_addr;
 	int ctl_socket = -1, int_socket = -1;
 	struct wiimote *wiimote = NULL;
-   bdaddr_t bdaddr;
 
-   if (pbdaddr == NULL) {
-      bdaddr = *BDADDR_ANY;
-   } else {
-      bdaddr = *pbdaddr;
-   }
+	if (bdaddr == NULL) {
+		bdaddr = BDADDR_ANY;
+	}
 
 	/* If BDADDR_ANY is given, find available wiimote */
-	if (bacmp(&bdaddr, BDADDR_ANY) == 0) {
-		if (cwiid_find_wiimote(&bdaddr, timeout)) {
+	if (bacmp(bdaddr, BDADDR_ANY) == 0) {
+		if (cwiid_find_wiimote(bdaddr, timeout)) {
 			goto ERR_HND;
 		}
 		sleep(1);
@@ -62,7 +59,7 @@ cwiid_wiimote_t *cwiid_open_timeout(bdaddr_t *pbdaddr, int flags, int timeout)
 	/* Control Channel */
 	memset(&remote_addr, 0, sizeof remote_addr);
 	remote_addr.l2_family = AF_BLUETOOTH;
-   bacpy( &remote_addr.l2_bdaddr, &bdaddr );
+   bacpy( &remote_addr.l2_bdaddr, bdaddr );
 	remote_addr.l2_psm = htobs(CTL_PSM);
 	if ((ctl_socket =
 	  socket(AF_BLUETOOTH, SOCK_SEQPACKET, BTPROTO_L2CAP)) == -1) {
