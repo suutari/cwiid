@@ -142,8 +142,7 @@ int cwiid_get_bdinfo_array(int dev_id, unsigned int timeout, int max_bdinfo,
 	}
 
 CODA:
-	if (dev_list)
-      free(dev_list);
+	bt_free(dev_list);
 	if (sock != -1)
       hci_close_dev(sock);
 	if (err) {
