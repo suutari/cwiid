@@ -54,6 +54,16 @@ int cwiid_send_rpt(cwiid_wiimote_t *wiimote, uint8_t flags, uint8_t report,
 {
 	unsigned char buf[32];
 
+	if (wiimote == NULL) {
+		cwiid_err( wiimote, "cwiid_send_prt: wiimote is null" );
+		return -1;
+	}
+
+	if (wiimote->ctl_socket == -1) {
+		cwiid_err( wiimote, "cwiid_send_prt: wiimote control socket is invalid" );
+		return -1;
+	}
+
    if (len+2 > sizeof(buf)) {
 		cwiid_err( wiimote, "cwiid_send_prt: %d bytes over maximum", len+2-sizeof(buf) );
 		return -1;
