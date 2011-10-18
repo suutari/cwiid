@@ -131,7 +131,7 @@ int cwiid_set_rumble(cwiid_wiimote_t *wiimote, uint8_t rumble)
 	return 0;
 }
 
-int cwiid_set_rpt_mode(cwiid_wiimote_t *wiimote, uint8_t rpt_mode)
+int cwiid_set_rpt_mode(cwiid_wiimote_t *wiimote, uint16_t rpt_mode)
 {
 	return update_rpt_mode(wiimote, rpt_mode);
 }

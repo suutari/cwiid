@@ -142,7 +142,7 @@ void *status_thread(struct wiimote *wiimote)
 {
 	struct mesg_array ma;
 	struct cwiid_status_mesg *status_mesg;
-	unsigned char buf[2];
+	unsigned char buf[6];
 
 	ma.count = 1;
 	status_mesg = &ma.array[0].status_mesg;
@@ -162,13 +162,13 @@ void *status_thread(struct wiimote *wiimote)
 
 		if (status_mesg->ext_type == CWIID_EXT_UNKNOWN) {
 			/* Read extension ID */
-			if (cwiid_read(wiimote, CWIID_RW_REG, 0xA400FE, 2, &buf)) {
+			if (cwiid_read(wiimote, CWIID_RW_REG, 0xA400FA, 6, &buf)) {
 				cwiid_err(wiimote, "Read error (extension error)");
 				status_mesg->ext_type = CWIID_EXT_UNKNOWN;
 			}
 			/* If the extension didn't change, or if the extension is a
 			 * MotionPlus, no init necessary */
-			switch ((buf[0] << 8) | buf[1]) {
+			switch ((buf[4] << 8) | buf[5]) {
 			case EXT_NONE:
 				status_mesg->ext_type = CWIID_EXT_NONE;
 				break;
@@ -184,6 +184,22 @@ void *status_thread(struct wiimote *wiimote)
 			case EXT_MOTIONPLUS:
 				status_mesg->ext_type = CWIID_EXT_MOTIONPLUS;
 				break;
+			case EXT_INSTRUMENT:
+				switch (buf[0]) {
+				case 0x00:
+					status_mesg->ext_type = CWIID_EXT_GUITAR;
+					break;
+				case 0x01:
+					status_mesg->ext_type = CWIID_EXT_DRUMS;
+					break;
+				case 0x03:
+					status_mesg->ext_type = CWIID_EXT_TURNTABLES;
+					break;
+				default:
+					status_mesg->ext_type = CWIID_EXT_UNKNOWN;
+					break;
+				}
+				break;
 			case EXT_PARTIAL:
 				/* Everything (but MotionPlus) shows up as partial until initialized */
 				buf[0] = 0x55;
@@ -198,12 +214,12 @@ void *status_thread(struct wiimote *wiimote)
 						status_mesg->ext_type = CWIID_EXT_UNKNOWN;
 				}
 				/* Read extension ID */
-				else if (cwiid_read(wiimote, CWIID_RW_REG, 0xA400FE, 2, &buf)) {
+				else if (cwiid_read(wiimote, CWIID_RW_REG, 0xA400FA, 6, &buf)) {
 					cwiid_err(wiimote, "Read error (extension error)");
 					status_mesg->ext_type = CWIID_EXT_UNKNOWN;
 				}
 				else {
-					switch ((buf[0] << 8) | buf[1]) {
+					switch ((buf[4] << 8) | buf[5]) {
 					case EXT_NONE:
 					case EXT_PARTIAL:
 						status_mesg->ext_type = CWIID_EXT_NONE;
@@ -216,6 +232,22 @@ void *status_thread(struct wiimote *wiimote)
 						break;
 					case EXT_BALANCE:
 						status_mesg->ext_type = CWIID_EXT_BALANCE;
+						break;
+					case EXT_INSTRUMENT:
+						switch (buf[0]) {
+						case 0x00:
+							status_mesg->ext_type = CWIID_EXT_GUITAR;
+							break;
+						case 0x01:
+							status_mesg->ext_type = CWIID_EXT_DRUMS;
+							break;
+						case 0x03:
+							status_mesg->ext_type = CWIID_EXT_TURNTABLES;
+							break;
+						default:
+							status_mesg->ext_type = CWIID_EXT_UNKNOWN;
+							break;
+						}
 						break;
 					default:
 						status_mesg->ext_type = CWIID_EXT_UNKNOWN;

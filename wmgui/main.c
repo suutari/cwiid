@@ -60,6 +60,7 @@ struct acc_cal wm_cal, nc_cal;
 struct cwiid_ir_mesg ir_data;
 struct stick nc_stick;
 struct stick cc_l_stick, cc_r_stick;
+struct stick ghg_stick;
 
 /* Widgets */
 GtkWidget *winMain;
@@ -114,10 +115,17 @@ GtkWidget *btnWrite;
 GtkWidget *tvRW;
 GtkWidget *btnRWClose;
 GtkWidget *btnBeep;
+GtkWidget *evGHGUp, *evGHGDown, *evGHGPlus, *evGHGMinus, 
+          *evGHGGreen, *evGHGRed, *evGHGYellow, *evGHGBlue, *evGHGOrange;
+GtkWidget *drawGHGStick;
+GtkWidget *progGHGWhammy, *progGHGTouchBar;
+GtkWidget *lblGuitar, *lblGHGUp, *lblGHGDown, *lblGHGPlus, *lblGHGMinus, 
+          *lblGHGGreen, *lblGHGRed, *lblGHGYellow, *lblGHGBlue, *lblGHGOrange,
+          *lblGHGStick, *lblGHGWhammy, *lblGHGWhammyVal, *lblGHGTouchBar, *lblGHGTouchBarVal;
 
 GtkTextBuffer *tbRW;
 
-GdkColor btn_on, btn_off;
+GdkColor btn_on, btn_green_on, btn_red_on, btn_yellow_on, btn_blue_on, btn_orange_on, btn_off;
 
 /* Utility functions */
 void set_gui_state();
@@ -127,6 +135,7 @@ void clear_ir_data();
 void clear_nunchuk_widgets();
 void clear_classic_widgets();
 void clear_motionplus_widgets();
+void clear_guitar_widgets();
 void message(GtkMessageType type, const gchar *message, GtkWindow *parent);
 void status(const gchar *status);
 
@@ -162,6 +171,7 @@ void cwiid_ir(struct cwiid_ir_mesg *);
 void cwiid_nunchuk(struct cwiid_nunchuk_mesg *);
 void cwiid_classic(struct cwiid_classic_mesg *);
 void cwiid_motionplus(struct cwiid_motionplus_mesg *);
+void cwiid_guitar(struct cwiid_guitar_mesg *);
 
 /* GetOpt */
 #define OPTSTRING	"h"
@@ -363,6 +373,33 @@ int main (int argc, char *argv[])
 	progMPPhi = lookup_widget(winMain, "progMPPhi");
 	progMPTheta = lookup_widget(winMain, "progMPTheta");
 	progMPPsi = lookup_widget(winMain, "progMPPsi");
+
+	lblGuitar = lookup_widget(winMain, "lblGuitar");
+	evGHGUp = lookup_widget(winMain, "evGHGUp");
+	evGHGDown = lookup_widget(winMain, "evGHGDown");
+	evGHGGreen = lookup_widget(winMain, "evGHGGreen");
+	evGHGRed = lookup_widget(winMain, "evGHGRed");
+	evGHGYellow = lookup_widget(winMain, "evGHGYellow");
+	evGHGBlue = lookup_widget(winMain, "evGHGBlue");
+	evGHGOrange = lookup_widget(winMain, "evGHGOrange");
+	evGHGPlus = lookup_widget(winMain, "evGHGPlus");
+	evGHGMinus = lookup_widget(winMain, "evGHGMinus");
+/*	drawGHGStick = lookup_widget(winMain, "drawGHGStick");
+	lblGHGUp = lookup_widget(winMain, "lblGHGUp");
+	lblGHGDown = lookup_widget(winMain, "lblGHGDown");
+	lblGHGPlus = lookup_widget(winMain, "lblGHGPlus");
+	lblGHGMinus = lookup_widget(winMain, "lblGHGMinus");
+	lblGHGGreen = lookup_widget(winMain, "lblGHGGreen");
+	lblGHGRed = lookup_widget(winMain, "lblGHGRed");
+	lblGHGYellow = lookup_widget(winMain, "lblGHGYellow");
+	lblGHGBlue = lookup_widget(winMain, "lblGHGBlue");
+	lblGHGOrange = lookup_widget(winMain, "lblGHGOrange");
+	lblGHGStick = lookup_widget(winMain, "lblGHGStick");
+	lblGHGWhammy = lookup_widget(winMain, "lblGHGWhammy");
+	lblGHGWhammyVal = lookup_widget(winMain, "lblGHGWhammyVal");
+	lblGHGTouchBar = lookup_widget(winMain, "lblGHGTouchBar");
+	lblGHGTouchBarVal = lookup_widget(winMain, "lblGHGTouchBarVal");
+*/
 	statConnection = lookup_widget(winMain, "statConnection");
 	statBattery = lookup_widget(winMain, "statBattery");
 	statExtension = lookup_widget(winMain, "statExtension");
@@ -413,6 +450,8 @@ int main (int argc, char *argv[])
 	                 G_CALLBACK(drawStick_expose_event), &cc_l_stick);
 	g_signal_connect(drawCCRStick, "expose_event",
 	                 G_CALLBACK(drawStick_expose_event), &cc_r_stick);
+	g_signal_connect(drawGHGStick, "expose_event",
+	                 G_CALLBACK(drawStick_expose_event), &ghg_stick);
 	g_signal_connect(btnRead, "clicked", G_CALLBACK(btnRead_clicked), NULL);
 	g_signal_connect(btnWrite, "clicked", G_CALLBACK(btnWrite_clicked), NULL);
 	g_signal_connect(btnRWClose, "clicked", G_CALLBACK(btnRWClose_clicked),
@@ -426,6 +465,7 @@ int main (int argc, char *argv[])
 	nc_stick.max = 0xFF;
 	cc_l_stick.max = CWIID_CLASSIC_L_STICK_MAX;
 	cc_r_stick.max = CWIID_CLASSIC_R_STICK_MAX;
+	ghg_stick.max = CWIID_GUITAR_STICK_MAX;
 
 	set_gui_state();
 	clear_widgets();
@@ -555,6 +595,21 @@ void set_gui_state()
 	gtk_widget_set_sensitive(progMPPhi, ext_active);
 	gtk_widget_set_sensitive(progMPTheta, ext_active);
 	gtk_widget_set_sensitive(progMPPsi, ext_active);
+	gtk_widget_set_sensitive(lblGuitar, ext_active);
+	gtk_widget_set_sensitive(lblGHGUp, ext_active);
+	gtk_widget_set_sensitive(lblGHGDown, ext_active);
+	gtk_widget_set_sensitive(lblGHGPlus, ext_active);
+	gtk_widget_set_sensitive(lblGHGMinus, ext_active);
+	gtk_widget_set_sensitive(lblGHGGreen, ext_active);
+	gtk_widget_set_sensitive(lblGHGRed, ext_active);
+	gtk_widget_set_sensitive(lblGHGYellow, ext_active);
+	gtk_widget_set_sensitive(lblGHGBlue, ext_active);
+	gtk_widget_set_sensitive(lblGHGOrange, ext_active);
+	gtk_widget_set_sensitive(lblGHGStick, ext_active);
+	gtk_widget_set_sensitive(lblGHGWhammy, ext_active);
+	gtk_widget_set_sensitive(lblGHGWhammyVal, ext_active);
+	gtk_widget_set_sensitive(lblGHGTouchBar, ext_active);
+	gtk_widget_set_sensitive(lblGHGTouchBarVal, ext_active);
 }
 
 void clear_widgets()
@@ -573,6 +628,7 @@ void clear_widgets()
 	clear_nunchuk_widgets();
 	clear_classic_widgets();
 	clear_motionplus_widgets();
+	clear_guitar_widgets();
 }
 
 void clear_acc_widgets()
@@ -637,6 +693,14 @@ void clear_motionplus_widgets()
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progMPPhi), 0.0);
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progMPTheta), 0.0);
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progMPPsi), 0.0);
+}
+void clear_guitar_widgets()
+{
+/*	ghg_stick.valid = 0;
+	gtk_widget_queue_draw(drawGHGStick);
+	gtk_label_set_text(GTK_LABEL(lblGHGWhammyVal), "0");
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progGHGWhammy), 0.0);
+*/
 }
 
 gboolean winMain_delete_event(void)
@@ -1075,6 +1139,9 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 			case CWIID_EXT_MOTIONPLUS:
 				ext_str = "MotionPlus";
 				break;
+			case CWIID_EXT_GUITAR:
+				ext_str = "Guitar";
+				break;
 			case CWIID_EXT_UNKNOWN:
 				ext_str = "Unknown extension";
 				break;
@@ -1083,6 +1150,7 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 			clear_nunchuk_widgets();
 			clear_classic_widgets();
 			clear_motionplus_widgets();
+			clear_guitar_widgets();
 			ext_type = mesg_array[i].status_mesg.ext_type;
 			break;
 		case CWIID_MESG_BTN:
@@ -1102,6 +1170,9 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 			break;
 		case CWIID_MESG_MOTIONPLUS:
 			cwiid_motionplus(&mesg_array[i].motionplus_mesg);
+			break;
+		case CWIID_MESG_GUITAR:
+			cwiid_guitar(&mesg_array[i].guitar_mesg);
 			break;
 		case CWIID_MESG_ERROR:
 			menuDisconnect_activate();
@@ -1151,15 +1222,15 @@ void cwiid_acc(struct cwiid_acc_mesg *mesg)
 		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc[CWIID_X]);
 		gtk_label_set_text(GTK_LABEL(lblAccXVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progAccX),
-		                              (double)mesg->acc[CWIID_X]/0xFF);
+		                              (double)mesg->acc[CWIID_X]/CWIID_ACC_MAX);
 		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc[CWIID_Y]);
 		gtk_label_set_text(GTK_LABEL(lblAccYVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progAccY),
-		                              (double)mesg->acc[CWIID_Y]/0xFF);
+		                              (double)mesg->acc[CWIID_Y]/CWIID_ACC_MAX);
 		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc[CWIID_Z]);
 		gtk_label_set_text(GTK_LABEL(lblAccZVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progAccZ),
-		                              (double)mesg->acc[CWIID_Z]/0xFF);
+		                              (double)mesg->acc[CWIID_Z]/CWIID_ACC_MAX);
 
 		a_x = ((double)mesg->acc[CWIID_X] - wm_cal.zero[CWIID_X]) /
 		      (wm_cal.one[CWIID_X] - wm_cal.zero[CWIID_X]);
@@ -1215,15 +1286,15 @@ void cwiid_nunchuk(struct cwiid_nunchuk_mesg *mesg)
 		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc[CWIID_X]);
 		gtk_label_set_text(GTK_LABEL(lblNCAccXVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progNCAccX),
-		                              (double)mesg->acc[CWIID_X]/0xFF);
+		                              (double)mesg->acc[CWIID_X]/CWIID_ACC_MAX);
 		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc[CWIID_Y]);
 		gtk_label_set_text(GTK_LABEL(lblNCAccYVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progNCAccY),
-		                              (double)mesg->acc[CWIID_Y]/0xFF);
+		                              (double)mesg->acc[CWIID_Y]/CWIID_ACC_MAX);
 		g_snprintf(str, LBLVAL_LEN, "%X", mesg->acc[CWIID_Z]);
 		gtk_label_set_text(GTK_LABEL(lblNCAccZVal), str);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progNCAccZ),
-		                              (double)mesg->acc[CWIID_Z]/0xFF);
+		                              (double)mesg->acc[CWIID_Z]/CWIID_ACC_MAX);
 
 		/* TODO: get nunchuk calibration */
 		a_x = ((double)mesg->acc[CWIID_X] - nc_cal.zero[CWIID_X]) /
@@ -1333,4 +1404,35 @@ void cwiid_motionplus(struct cwiid_motionplus_mesg *mesg)
 		                              (double)mesg->angle_rate[CWIID_PSI]/0x4000);
 	}
 }
+void cwiid_guitar(struct cwiid_guitar_mesg *mesg)
+{
+	static gchar str[LBLVAL_LEN];
 
+	if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(chkExt))) {
+		gtk_widget_modify_bg(evGHGUp, GTK_STATE_NORMAL,
+		    (mesg->buttons & CWIID_GUITAR_BTN_UP) ? &btn_on : &btn_off);
+		gtk_widget_modify_bg(evGHGDown, GTK_STATE_NORMAL,
+		    (mesg->buttons & CWIID_GUITAR_BTN_DOWN) ? &btn_on : &btn_off);
+		gtk_widget_modify_bg(evGHGGreen, GTK_STATE_NORMAL,
+		    (mesg->buttons & CWIID_GUITAR_BTN_GREEN) ? &btn_on : &btn_off);
+		gtk_widget_modify_bg(evGHGRed, GTK_STATE_NORMAL,
+		    (mesg->buttons & CWIID_GUITAR_BTN_RED) ? &btn_on : &btn_off);
+		gtk_widget_modify_bg(evGHGYellow, GTK_STATE_NORMAL,
+		    (mesg->buttons & CWIID_GUITAR_BTN_YELLOW) ? &btn_on : &btn_off);
+		gtk_widget_modify_bg(evGHGBlue, GTK_STATE_NORMAL,
+		    (mesg->buttons & CWIID_GUITAR_BTN_BLUE) ? &btn_on : &btn_off);
+		gtk_widget_modify_bg(evGHGOrange, GTK_STATE_NORMAL,
+		    (mesg->buttons & CWIID_GUITAR_BTN_ORANGE) ? &btn_on : &btn_off);
+/*
+		gtk_widget_modify_bg(evGHGPlus, GTK_STATE_NORMAL,
+		    (mesg->buttons & CWIID_GUITAR_BTN_PLUS) ? &btn_on : &btn_off);
+		gtk_widget_modify_bg(evGHGMinus, GTK_STATE_NORMAL,
+		    (mesg->buttons & CWIID_GUITAR_BTN_MINUS) ? &btn_on : &btn_off);
+		ghg_stick.valid = 1;
+		ghg_stick.x = mesg->stick[CWIID_X];
+		ghg_stick.y = mesg->stick[CWIID_Y];
+		gtk_widget_queue_draw(drawGHGStick);
+*/
+	}
+
+}

@@ -95,12 +95,12 @@ int process_acc(struct wiimote *wiimote, const unsigned char *data,
 	if (wiimote->state.rpt_mode & CWIID_RPT_ACC) {
 		acc_mesg = &ma->array[ma->count++].acc_mesg;
 		acc_mesg->type = CWIID_MESG_ACC;
-		acc_mesg->acc[CWIID_X] = ((uint16_t)data[3] << 2) |
-                               ((uint16_t)data[0] & ((1<<6) | (1<<5)));
-		acc_mesg->acc[CWIID_Y] = ((uint16_t)data[4] << 2) |
-                               ((uint16_t)data[1] & (1<<5));
-		acc_mesg->acc[CWIID_Z] = ((uint16_t)data[5] << 2) |
-                               ((uint16_t)data[1] & (1<<6));
+		acc_mesg->acc[CWIID_X] = ((uint16_t)data[2] << 2) |
+                  (((uint16_t)data[0] & (3<<5)) >> 5);
+		acc_mesg->acc[CWIID_Y] = ((uint16_t)data[3] << 2) |
+                  (((uint16_t)data[1] & (1<<5)) >> 4);
+		acc_mesg->acc[CWIID_Z] = ((uint16_t)data[4] << 2) |
+                   (((uint16_t)data[1] & (1<<6)) >> 5);
 	}
 
 	return 0;
@@ -185,6 +185,10 @@ int process_ext(struct wiimote *wiimote, unsigned char *data,
 	struct cwiid_classic_mesg *classic_mesg;
 	struct cwiid_balance_mesg *balance_mesg;
 	struct cwiid_motionplus_mesg *motionplus_mesg;
+	struct cwiid_guitar_mesg *guitar_mesg;
+	struct cwiid_drums_mesg *drums_mesg;
+	struct cwiid_turntables_mesg *turntables_mesg;
+
 	int i;
 
 	(void)len;
@@ -202,11 +206,11 @@ int process_ext(struct wiimote *wiimote, unsigned char *data,
 			nunchuk_mesg->stick[CWIID_X] = data[0];
 			nunchuk_mesg->stick[CWIID_Y] = data[1];
 			nunchuk_mesg->acc[CWIID_X]   = ((uint16_t)data[2]<<2) |
-                                        ((uint16_t)data[5] & ((1<<2) + (1<<3)));
+                          (((uint16_t)data[5] & (3 << 2)) >> 2);
 			nunchuk_mesg->acc[CWIID_Y]   = ((uint16_t)data[3]<<2) |
-                                        ((uint16_t)data[5] & ((1<<4) + (1<<5)));
+                          (((uint16_t)data[5] & (3 << 4)) >> 4);
 			nunchuk_mesg->acc[CWIID_Z]   = ((uint16_t)data[4]<<2) |
-                                        ((uint16_t)data[5] & ((1<<6) + (1<<7)));
+                          (((uint16_t)data[5] & (3 << 6)) >> 6);
 			nunchuk_mesg->buttons = ~data[5] & NUNCHUK_BTN_MASK;
 		}
 		break;
@@ -270,13 +274,71 @@ int process_ext(struct wiimote *wiimote, unsigned char *data,
             nunchuk_mesg->stick[CWIID_X] = data[0];
             nunchuk_mesg->stick[CWIID_Y] = data[1];
             nunchuk_mesg->acc[CWIID_X]   = ((uint16_t)data[2]<<2) |
-                                           (((uint16_t)data[5] & (1<<4)) << 1);
+                                           (((uint16_t)data[5] & (1<<4)) >> 3);
             nunchuk_mesg->acc[CWIID_Y]   = ((uint16_t)data[3]<<2) |
-                                           (((uint16_t)data[5] & (1<<5)) << 1);
-            nunchuk_mesg->acc[CWIID_Z]   = ((uint16_t)data[4]<<2) |
-                                           ((uint16_t)data[5] & ((1<<6) + (1<<7)));
+                                           (((uint16_t)data[5] & (1<<5)) >> 4);
+            nunchuk_mesg->acc[CWIID_Z]   = ((uint16_t)(data[4] & ~1)<<2) |
+                                           ((uint16_t)data[5] & (3<<6)) >> 5;
             nunchuk_mesg->buttons = ~((data[5] & (1<<3 | 1<<2)) >> 2);
          }
+		}
+		break;
+	case CWIID_EXT_GUITAR:
+		if (wiimote->state.rpt_mode & CWIID_RPT_GUITAR) {
+			guitar_mesg = &ma->array[ma->count++].guitar_mesg;
+			guitar_mesg->type = CWIID_MESG_GUITAR;
+			guitar_mesg->stick[CWIID_X] = data[0] & CWIID_GUITAR_STICK_MAX;
+			guitar_mesg->stick[CWIID_Y] = data[1] & CWIID_GUITAR_STICK_MAX;
+			guitar_mesg->whammy = data[3] & CWIID_GUITAR_WHAMMY_MAX;
+			guitar_mesg->buttons = ~((uint16_t)data[4]<<8 |
+			                         (uint16_t)data[5]);
+			unsigned int touch_bar_data = data[2] & CWIID_GUITAR_TOUCH_BAR_MAX;
+			if (touch_bar_data == CWIID_GUITAR_TOUCHBAR_VALUE_NONE) {
+				guitar_mesg->touch_bar = CWIID_GUITAR_TOUCHBAR_NONE;
+			} else if (touch_bar_data < CWIID_GUITAR_TOUCHBAR_VALUE_1ST_AND_2ND) {
+				guitar_mesg->touch_bar = CWIID_GUITAR_TOUCHBAR_1ST;
+			} else if (touch_bar_data < CWIID_GUITAR_TOUCHBAR_VALUE_2ND) {
+				guitar_mesg->touch_bar = CWIID_GUITAR_TOUCHBAR_1ST_AND_2ND;
+			} else if (touch_bar_data < CWIID_GUITAR_TOUCHBAR_VALUE_2ND_AND_3RD) {
+				guitar_mesg->touch_bar = CWIID_GUITAR_TOUCHBAR_2ND;
+			} else if (touch_bar_data < CWIID_GUITAR_TOUCHBAR_VALUE_3RD) {
+				guitar_mesg->touch_bar = CWIID_GUITAR_TOUCHBAR_2ND_AND_3RD;
+			} else if (touch_bar_data < CWIID_GUITAR_TOUCHBAR_VALUE_3RD_AND_4TH) {
+				guitar_mesg->touch_bar = CWIID_GUITAR_TOUCHBAR_3RD;
+			} else if (touch_bar_data < CWIID_GUITAR_TOUCHBAR_VALUE_4TH) {
+				guitar_mesg->touch_bar = CWIID_GUITAR_TOUCHBAR_3RD_AND_4TH;
+			} else if (touch_bar_data < CWIID_GUITAR_TOUCHBAR_VALUE_4TH_AND_5TH) {
+				guitar_mesg->touch_bar = CWIID_GUITAR_TOUCHBAR_4TH;
+			} else if (touch_bar_data < CWIID_GUITAR_TOUCHBAR_VALUE_5TH) {
+				guitar_mesg->touch_bar = CWIID_GUITAR_TOUCHBAR_4TH_AND_5TH;
+			} else {
+				guitar_mesg->touch_bar = CWIID_GUITAR_TOUCHBAR_5TH;
+			}
+
+		}
+		break;
+	case CWIID_EXT_DRUMS:
+		if (wiimote->state.rpt_mode & CWIID_RPT_DRUMS) {
+			drums_mesg = &ma->array[ma->count++].drums_mesg;
+			drums_mesg->type = CWIID_MESG_DRUMS;
+			// TODO: implement this
+		}
+		break;
+	case CWIID_EXT_TURNTABLES:
+		if (wiimote->state.rpt_mode & CWIID_RPT_TURNTABLES) {
+			turntables_mesg = &ma->array[ma->count++].turntables_mesg;
+			turntables_mesg->type = CWIID_MESG_TURNTABLES;
+			turntables_mesg->stick[CWIID_X] = data[0] & CWIID_TURNTABLES_STICK_MAX;
+			turntables_mesg->stick[CWIID_Y] = data[1] & CWIID_TURNTABLES_STICK_MAX;
+			turntables_mesg->crossfader = ((uint8_t)data[2] & 0x1E)>>1;
+			turntables_mesg->effect_dial = ((uint8_t)data[2] & 0x60)>>2 | 
+                                                       ((uint8_t)data[3] & 0xE0)>>5;
+			turntables_mesg->left_turntable = (int8_t)((uint8_t)data[3] & 0x1F) | 
+                                                          ((uint8_t)data[4] & 0x1)<<5;
+			turntables_mesg->right_turntable = (int8_t)((uint8_t)data[0] & 0xC0)>>3 | 
+                                                           ((uint8_t)data[1] & 0xC0)>>5 | 
+                                                           ((uint8_t)data[3] & 0x80)>>7;
+			turntables_mesg->buttons =  ~(((uint16_t)data[4] & 0xFE)<<8 | (uint16_t)data[5]);
 		}
 		break;
 	}
