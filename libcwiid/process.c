@@ -317,9 +317,55 @@ int process_ext(struct wiimote *wiimote, unsigned char *data,
 		break;
 	case CWIID_EXT_DRUMS:
 		if (wiimote->state.rpt_mode & CWIID_RPT_DRUMS) {
+/*		
+		#define BYTETOBINARYPATTERN "%d%d%d%d%d%d%d%d"
+#define BYTETOBINARY(byte)  \
+  (byte & 0x80 ? 1 : 0), \
+  (byte & 0x40 ? 1 : 0), \
+  (byte & 0x20 ? 1 : 0), \
+  (byte & 0x10 ? 1 : 0), \
+  (byte & 0x08 ? 1 : 0), \
+  (byte & 0x04 ? 1 : 0), \
+  (byte & 0x02 ? 1 : 0), \
+  (byte & 0x01 ? 1 : 0) 
+  printf("data:\n"BYTETOBINARYPATTERN"\n"BYTETOBINARYPATTERN"\n"BYTETOBINARYPATTERN"\n", BYTETOBINARY(data[0]), BYTETOBINARY(data[1]), BYTETOBINARY(data[2]));
+  printf(BYTETOBINARYPATTERN"\n"BYTETOBINARYPATTERN"\n"BYTETOBINARYPATTERN"\n", BYTETOBINARY(data[3]), BYTETOBINARY(data[4]), BYTETOBINARY(data[5]));
+*/  
 			drums_mesg = &ma->array[ma->count++].drums_mesg;
 			drums_mesg->type = CWIID_MESG_DRUMS;
-			// TODO: implement this
+			drums_mesg->stick[CWIID_X] = data[0] & CWIID_DRUMS_STICK_MAX;
+			drums_mesg->stick[CWIID_Y] = data[1] & CWIID_DRUMS_STICK_MAX;
+
+			if ((uint8_t)data[2] & 0x40) {
+				switch (((uint8_t)data[2] & 0x3E) >> 1) {
+					case 0x0E:
+						drums_mesg->velocity_source = CWIID_DRUMS_VELOCITY_SOURCE_ORANGE;
+						break;
+					case 0x0F:
+						drums_mesg->velocity_source = CWIID_DRUMS_VELOCITY_SOURCE_BLUE;
+						break;
+					case 0x11:
+						drums_mesg->velocity_source = CWIID_DRUMS_VELOCITY_SOURCE_YELLOW;
+						break;
+					case 0x12:
+						drums_mesg->velocity_source = CWIID_DRUMS_VELOCITY_SOURCE_GREEN;
+						break;
+					case 0x19:
+						drums_mesg->velocity_source = CWIID_DRUMS_VELOCITY_SOURCE_RED;
+						break;
+					case 0x1B:
+						drums_mesg->velocity_source = CWIID_DRUMS_VELOCITY_SOURCE_PEDAL;
+						break;
+					default:
+						drums_mesg->velocity_source = CWIID_DRUMS_VELOCITY_SOURCE_NONE;
+				}
+				drums_mesg->velocity = 7 - (((uint8_t)data[3] & 0xE0) >> 5);
+			} else {
+				// cwiid_err(wiimote, "no velocity data TODO: FIXME");
+				drums_mesg->velocity_source = CWIID_DRUMS_VELOCITY_SOURCE_NONE;
+				drums_mesg->velocity = 0;
+			}
+			drums_mesg->buttons = ~((uint16_t)data[4]<<8 | (uint16_t)data[5]);
 		}
 		break;
 	case CWIID_EXT_TURNTABLES:
