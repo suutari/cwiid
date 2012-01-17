@@ -376,12 +376,19 @@ int process_ext(struct wiimote *wiimote, unsigned char *data,
 			turntables_mesg->stick[CWIID_Y] = data[1] & CWIID_TURNTABLES_STICK_MAX;
 			turntables_mesg->crossfader = ((uint8_t)data[2] & 0x1E)>>1;
 			turntables_mesg->effect_dial = ((uint8_t)data[2] & 0x60)>>2 | 
-                                                       ((uint8_t)data[3] & 0xE0)>>5;
-			turntables_mesg->left_turntable = (int8_t)((uint8_t)data[3] & 0x1F) | 
-                                                          ((uint8_t)data[4] & 0x1)<<5;
-			turntables_mesg->right_turntable = (int8_t)((uint8_t)data[0] & 0xC0)>>3 | 
-                                                           ((uint8_t)data[1] & 0xC0)>>5 | 
-                                                           ((uint8_t)data[3] & 0x80)>>7;
+                                           ((uint8_t)data[3] & 0xE0)>>5;
+            int8_t left_x4 = (int8_t)(
+							     ((uint8_t)data[3] & 0x1F)
+							   | ((uint8_t)data[4] & 0x1)<<5
+							 )<<2;
+			turntables_mesg->left_turntable = left_x4 / 4;
+			int8_t right_x4 = (int8_t)(
+								  ((uint8_t)data[0] & 0xC0)>>3
+								| ((uint8_t)data[1] & 0xC0)>>5
+								| ((uint8_t)data[2] & 0x80)>>7
+								| ((uint8_t)data[2] & 0x01)<<5
+							  )<<2;
+			turntables_mesg->right_turntable = right_x4 / 4;
 			turntables_mesg->buttons =  ~(((uint16_t)data[4] & 0xFE)<<8 | (uint16_t)data[5]);
 		}
 		break;

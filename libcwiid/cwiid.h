@@ -178,6 +178,8 @@
 
 /* Turntables max values */
 #define CWIID_TURNTABLES_STICK_MAX 0x3F
+#define CWIID_TURNTABLES_CROSSFADER_MAX 0x0F
+#define CWIID_TURNTABLES_EFFECT_DIAL_MAX 0x1F
 
 
 /* Environment Variables */
