@@ -125,6 +125,7 @@ int conf_button(struct conf *conf, int source, __u16 button, __u16 action)
 		conf->classic_bmap[button].action = action;
 		break;
 	}
+	conf->rpt_mode_flags |= CWIID_RPT_MOTIONPLUS;
 
 	return 0;
 }
