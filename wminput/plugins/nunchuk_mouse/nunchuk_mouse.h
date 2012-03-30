@@ -15,7 +15,7 @@
 
 /* misc */
 #define DEADZONE            10
-#define RANGE               10 /* TODO: make this a parameter */
+#define RANGE               12.0 /* TODO: make this a parameter */
 
 /* calibration data.  Since the center isn't guaranteed to be the
  * average of min and max, we distinguish (as in the cases are not

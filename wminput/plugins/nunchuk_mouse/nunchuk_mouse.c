@@ -37,11 +37,11 @@ static void process_nunchuk(struct cwiid_nunchuk_mesg *mesg)
     data.buttons = 0;
     /* += (vs =): to accumulate the result of multiple events. */
     data.axes[X].value +=
-        (dxn >= 0)? -(dxn * RANGE / x_neg_range):
-        (dxp >= 0)? +(dxp * RANGE / x_pos_range): 0;
+      (dxn >= 0)? -(dxn * RANGE / x_neg_range):
+      (dxp >= 0)? +(dxp * RANGE / x_pos_range): 0;
     data.axes[Y].value +=
-        (dyn >= 0)? -(dyn * RANGE / y_neg_range):
-        (dyp >= 0)? +(dyp * RANGE / y_pos_range): 0;
+      (dyn >= 0)? -(dyn * RANGE / y_neg_range):
+      (dyp >= 0)? +(dyp * RANGE / y_pos_range): 0;
 }
 
 static void calibrate_joystick() {
@@ -60,14 +60,6 @@ static void calibrate_joystick() {
     center_y = buf[OFF_Y + OFF_CENTER];
     y_neg_range = (center_y - DEADZONE) - buf[OFF_Y + OFF_MIN]; // this is wrong
     y_pos_range = buf[OFF_Y + OFF_MAX] - (center_y + DEADZONE);
-
-    if( 0 ) {
-      printf("Calibration Data\n");
-      printf("y_neg_range: %d\n", y_neg_range);
-      printf("y_pos_range: %d\n", y_pos_range);
-      printf("x_neg_range: %d\n", x_neg_range);
-      printf("x_pos_range: %d\n", x_pos_range);
-    }
 }
 
 struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg mesg[])
