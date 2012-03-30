@@ -54,39 +54,47 @@ static void calibrate_joystick() {
     if (ret) wmplugin_err(plugin_id, "joystick calibration error");
 
     center_x = buf[OFF_X + OFF_CENTER];
-    x_neg_range = (center_x - DEADZONE) - buf[OFF_X - OFF_MIN];
+    x_neg_range = (center_x - DEADZONE) - buf[OFF_X + OFF_MIN];
     x_pos_range = buf[OFF_X + OFF_MAX] - (center_x + DEADZONE);
 
     center_y = buf[OFF_Y + OFF_CENTER];
-    y_neg_range = (center_y - DEADZONE) - buf[OFF_Y - OFF_MIN];
+    y_neg_range = (center_y - DEADZONE) - buf[OFF_Y + OFF_MIN]; // this is wrong
     y_pos_range = buf[OFF_Y + OFF_MAX] - (center_y + DEADZONE);
+
+    if( 0 ) {
+      printf("Calibration Data\n");
+      printf("y_neg_range: %d\n", y_neg_range);
+      printf("y_pos_range: %d\n", y_pos_range);
+      printf("x_neg_range: %d\n", x_neg_range);
+      printf("x_pos_range: %d\n", x_pos_range);
+    }
 }
 
 struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg mesg[])
-{
-	int i;
-	enum cwiid_ext_type ext_type = CWIID_EXT_NONE;
-	struct wmplugin_data *ret = NULL;
-
-    data.axes[X].value = data.axes[Y].value = 0;
-	for (i=0; i < mesg_count; i++) {
-		switch (mesg[i].type) {
-		case CWIID_MESG_STATUS:
-			if ((mesg[i].status_mesg.ext_type == CWIID_EXT_NUNCHUK) &&
-			  (ext_type != CWIID_EXT_NUNCHUK)) {
-              calibrate_joystick();
-			}
-			ext_type = mesg[i].status_mesg.ext_type;
-			break;
-		case CWIID_MESG_NUNCHUK:
-			process_nunchuk(&mesg[i].nunchuk_mesg);
-            ret = &data;
-            break;
-		default:
-			break;
-		}
-	}
-    return ret;
+{ 
+  int i;
+  enum cwiid_ext_type ext_type = CWIID_EXT_NONE;
+  struct wmplugin_data *ret = NULL;
+  
+  data.axes[X].value = data.axes[Y].value = 0;
+  for (i=0; i < mesg_count; i++) {
+    switch (mesg[i].type) {
+    case CWIID_MESG_STATUS:
+      if ((mesg[i].status_mesg.ext_type == CWIID_EXT_NUNCHUK) &&
+	  (ext_type != CWIID_EXT_NUNCHUK)) {
+	calibrate_joystick();
+      }
+      ext_type = mesg[i].status_mesg.ext_type;
+      break;
+    case CWIID_MESG_NUNCHUK:
+      process_nunchuk(&mesg[i].nunchuk_mesg);
+      ret = &data;
+      break;
+    default:
+      break;
+    }
+  }
+  return ret;
 }
 
 int wmplugin_init(int id, cwiid_wiimote_t *arg_wiimote)
@@ -104,6 +112,7 @@ int wmplugin_init(int id, cwiid_wiimote_t *arg_wiimote)
 }
 
 struct wmplugin_info *wmplugin_info() {
+  
     if (info_init) return &info;
 	info.button_count = 0;
 	info.axis_count = 2;
