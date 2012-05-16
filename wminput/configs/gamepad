@@ -1,4 +1,4 @@
-# gameport
+# gamepad
 
 Classic.Dpad.X = ABS_HAT0X
 Classic.Dpad.Y = ABS_HAT0Y
