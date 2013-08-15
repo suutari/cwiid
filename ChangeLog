@@ -1,3 +1,12 @@
+2013-08-16 Seppo Erviälä <seppo.erviala@iki.fi>
+	Collected all the projects from github together
+	* Initial motion plus support
+	* Bunch of plugins
+	* Two plugins for properly controlling the mouse with nunchuk stick
+	* Build fixes
+	* Bunch of new controllers
+	* Screwdriver plugin 
+
 2007-08-26 L. Donnie Smith <donnie.smith@gatech.edu>
 	docs
 	* updated wminput man page

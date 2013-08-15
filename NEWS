@@ -1,3 +1,18 @@
+0.7.00
+	- Collected all the projects from github
+        - Bunch of plugins
+        -- Screwdriver
+        -- Two plugins for using nunchuk as mouse
+        -- some others
+        - More supported devices
+        -- Guitar
+        -- Motion plus
+        -- Bongos
+        -- DJ Hero device
+	- More wiimote configurations
+        - Fixes to memory leaks, typos, building etc.
+
+
 0.6.00
 	- renamed libwiimote to libcwiid to avoid naming conflict with other projects
 	- rewrite of libcwiid architecture
