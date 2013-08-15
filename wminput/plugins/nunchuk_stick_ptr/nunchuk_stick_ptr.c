@@ -77,10 +77,11 @@ int wmplugin_init(int id, cwiid_wiimote_t *arg_wiimote)
 	return 0;
 }
 
-struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg mesg[])
+struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg mesg[], struct timespec *timestamp)
 {
+	(void) timestamp;	
 	int i;
-    //cwiid_set_led(wiimote, CWIID_LED1_ON);
+	//cwiid_set_led(wiimote, CWIID_LED1_ON);
 	struct wmplugin_data *ret = NULL;
 
 	for (i=0; i < mesg_count; i++) {
