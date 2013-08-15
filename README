@@ -19,6 +19,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 CWiid Wiimote Interface
 ------------------------------------------------------------------------------------------------
 
+QUICKSTART
+------------------------------------------------------------------------------------------------
+1. sudo apt-get install bison flex libgtk2.0-dev autotools-dev automake libbluetooth-dev
+2. cd cwiid
+3. aclocal
+4. autoconf
+5. ./configure --with-cwiid-config-dir=/etc/cwiid/
+6. make
+7. sudo make install
+
+8. sudo modprobe uinput
+9. wminput -c <key_bind_file>
+
+You can find key bind files at /etc/cwiid/wminput/
+
 DESCRIPTION
 ------------------------------------------------------------------------------------------------
 The CWiid package contains the following parts:
