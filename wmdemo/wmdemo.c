@@ -222,6 +222,9 @@ void print_state(struct cwiid_state *state)
 	if (state->rpt_mode & CWIID_RPT_CLASSIC) printf(" CLASSIC");
 	if (state->rpt_mode & CWIID_RPT_BALANCE) printf(" BALANCE");
 	if (state->rpt_mode & CWIID_RPT_MOTIONPLUS) printf(" MOTIONPLUS");
+	if (state->rpt_mode & CWIID_RPT_GUITAR) printf(" GUITAR");
+	if (state->rpt_mode & CWIID_RPT_DRUMS) printf(" DRUMS");
+	if (state->rpt_mode & CWIID_RPT_TURNTABLES) printf(" TURNTABLES");
 	printf("\n");
 	
 	printf("Active LEDs:");
@@ -296,6 +299,35 @@ void print_state(struct cwiid_state *state)
 		       state->ext.motionplus.low_speed[1],
 		       state->ext.motionplus.low_speed[2]);
 		break;
+	case CWIID_EXT_GUITAR:
+		printf("Guitar: btns=%.4X, whammy=%d, touch_bar=%x, stick=(%d,%d)\n", 
+		       state->ext.guitar.buttons,
+		       state->ext.guitar.whammy,
+		       state->ext.guitar.touch_bar,
+		       state->ext.guitar.stick[CWIID_X],
+		       state->ext.guitar.stick[CWIID_Y]
+		);
+		break;
+	case CWIID_EXT_DRUMS:
+		printf("Drums: btns=%.4X, velocity=%d, velocity source=%x, stick=(%d,%d)\n", 
+		       state->ext.drums.buttons,
+		       state->ext.drums.velocity,
+		       state->ext.drums.velocity_source,
+		       state->ext.drums.stick[CWIID_X],
+		       state->ext.drums.stick[CWIID_Y]
+		);
+		break;
+	case CWIID_EXT_TURNTABLES:
+		printf("Turntables: btns=%.4X, crossfader=%d, effect dial=%x, left turntable=%d, right turntable=%d, stick=(%d,%d)\n", 
+		       state->ext.turntables.buttons,
+		       state->ext.turntables.crossfader,
+		       state->ext.turntables.effect_dial,
+		       state->ext.turntables.left_turntable,
+		       state->ext.turntables.right_turntable,
+		       state->ext.turntables.stick[CWIID_X],
+		       state->ext.turntables.stick[CWIID_Y]
+		);
+		break;
 	}
 }
 
@@ -314,6 +346,8 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 {
 	int i, j;
 	int valid_source;
+
+	(void)timestamp;
 
 	for (i=0; i < mesg_count; i++)
 	{
@@ -336,6 +370,15 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 				break;
 			case CWIID_EXT_MOTIONPLUS:
 				printf("MotionPlus");
+				break;
+			case CWIID_EXT_GUITAR:
+				printf("Guitar");
+				break;
+			case CWIID_EXT_DRUMS:
+				printf("Drums");
+				break;
+			case CWIID_EXT_TURNTABLES:
+				printf("Turntables");
 				break;
 			default:
 				printf("Unknown Extension");
@@ -401,6 +444,35 @@ void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
 			       mesg[i].motionplus_mesg.low_speed[0],
 			       mesg[i].motionplus_mesg.low_speed[1],
 			       mesg[i].motionplus_mesg.low_speed[2]);
+			break;
+		case CWIID_MESG_GUITAR:
+			printf("Guitar: btns=%x, whammy=%x, touch_bar=%x, stick=(%x,%x)\n",
+			       mesg[i].guitar_mesg.buttons,
+			       mesg[i].guitar_mesg.whammy,
+			       mesg[i].guitar_mesg.touch_bar,
+			       mesg[i].guitar_mesg.stick[CWIID_X],
+			       mesg[i].guitar_mesg.stick[CWIID_Y]
+			);
+			break;
+		case CWIID_MESG_DRUMS:
+			printf("Drums: btns=%x, velocity=%x, velocity_source=%x, stick=(%x,%x)\n",
+			       mesg[i].drums_mesg.buttons,
+			       mesg[i].drums_mesg.velocity,
+			       mesg[i].drums_mesg.velocity_source,
+			       mesg[i].drums_mesg.stick[CWIID_X],
+			       mesg[i].drums_mesg.stick[CWIID_Y]
+			);
+			break;
+		case CWIID_MESG_TURNTABLES:
+			printf("Turntables: btns=%x, crossfader=%x, effect dial=%x, left_turntable=%d, right_turntable=%d, stick=(%x,%x)\n",
+			       mesg[i].turntables_mesg.buttons,
+			       mesg[i].turntables_mesg.crossfader,
+			       mesg[i].turntables_mesg.effect_dial,
+			       mesg[i].turntables_mesg.left_turntable,
+			       mesg[i].turntables_mesg.right_turntable,
+			       mesg[i].turntables_mesg.stick[CWIID_X],
+			       mesg[i].turntables_mesg.stick[CWIID_Y]
+			);
 			break;
 		case CWIID_MESG_ERROR:
 			if (cwiid_close(wiimote)) {

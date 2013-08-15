@@ -27,7 +27,7 @@ int c_plugin_open(struct plugin *plugin, char *dir);
 void c_plugin_close(struct plugin *plugin);
 int c_plugin_init(struct plugin *plugin, int id);
 int c_plugin_exec(struct plugin *plugin, int mesg_count,
-                   union cwiid_mesg mesg[]);
+                   union cwiid_mesg mesg[], struct timespec *timestamp);
 int c_plugin_param_int(struct plugin *plugin, int i, int value);
 int c_plugin_param_float(struct plugin *plugin, int i, float value);
 

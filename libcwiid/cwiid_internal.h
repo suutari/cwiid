@@ -96,6 +96,8 @@
 #define EXT_CLASSIC		0x0101
 #define EXT_BALANCE		0x0402
 #define EXT_MOTIONPLUS	0x0405
+#define EXT_INSTRUMENT	0x0103
+
 
 /* IR Enable blocks */
 #define MARCAN_IR_BLOCK_1			"\x00\x00\x00\x00\x00\x00\x90\x00\xC0"

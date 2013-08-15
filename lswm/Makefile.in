@@ -6,12 +6,12 @@ APP_NAME = lswm
 
 SOURCES = lswm.c
 
-CFLAGS += -I@top_builddir@/libcwiid
+CFLAGS += -I@top_srcdir@/libcwiid
 LDFLAGS += -L@top_builddir@/libcwiid
 LDLIBS += -lcwiid -lbluetooth
 INST_DIR = @bindir@
 
-include $(COMMON)/include/app.mak
+include $(APPINC)
 
 distclean: clean
 	rm Makefile

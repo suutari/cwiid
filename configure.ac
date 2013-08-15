@@ -1,6 +1,8 @@
 AC_INIT(CWiid,0.6.00,donnie.smith@gatech.edu)
 AC_CONFIG_HEADER(common/include/config.h)
 
+AC_CONFIG_SRCDIR(libcwiid/cwiid.h)
+
 AC_PROG_CC
 AC_PROG_AWK
 AC_PROG_LEX
@@ -18,7 +20,7 @@ fi
 AC_ARG_WITH(
 	[python],
 	[AS_HELP_STRING([--without-python],[compile without python support])],
-	[case $withval in 
+	[case $withval in
 		yes)
 			REQUIRE_PYTHON=1
 			PYTHON_NAME=python
@@ -89,19 +91,39 @@ else
 fi
 AC_SUBST(CWIID_PLUGINS_DIR)
 
-AC_ARG_WITH(ldconfig,AC_HELP_STRING([--disable-ldconfig],
-	[don't execute ldconfig after install]))
-if test "$enable_ldconfig" = "no"; then
+AC_ARG_ENABLE(
+	[ldconfig],
+	[AC_HELP_STRING([--disable-ldconfig],[don't execute ldconfig after install])],
+	[disable_ldconfig=yes])
+if test "$disable_ldconfig" = "yes"; then
 	LDCONFIG="#ldconfig"
 else
 	LDCONFIG="ldconfig"
 fi
 AC_SUBST(LDCONFIG)
 
-pkg_modules="gtk+-2.0 >= 2.0.0 gthread-2.0"
-PKG_CHECK_MODULES([GTK], [$pkg_modules])
-AC_SUBST(GTK_CFLAGS)
-AC_SUBST(GTK_LIBS)
+AC_ARG_WITH(
+	[gtk],
+	[AS_HELP_STRING([--without-gtk],[compile without GTK UI])],
+	[case $withval in
+		yes)
+			WANT_GTK=yes
+		;;
+		no)
+			WANT_GTK=
+		;;
+		*)
+			WANT_GTK=yes
+		;;
+	esac],
+	[WANT_GTK=yes])
+AC_SUBST(WANT_GTK)
+if test "$WANT_GTK" = "yes"; then
+	pkg_modules="gtk+-2.0 >= 2.0.0 gthread-2.0"
+	PKG_CHECK_MODULES([GTK], [$pkg_modules],,[AC_MSG_ERROR([Cannot find gtk+ >= 2.0.0, try --without-gtk])])
+	AC_SUBST(GTK_CFLAGS)
+	AC_SUBST(GTK_LIBS)
+fi
 
 AC_OUTPUT(
 	[Makefile]
@@ -116,6 +138,8 @@ AC_OUTPUT(
 	[wminput/Makefile]
 	[wminput/plugins/Makefile]
 	[wminput/plugins/ir_ptr/Makefile]
+	[wminput/plugins/ir_6dof/Makefile]
+	[wminput/plugins/3dof/Makefile]
 	[wminput/plugins/acc/Makefile]
 	[wminput/plugins/nunchuk_acc/Makefile]
 	[wminput/plugins/led/Makefile]
@@ -123,4 +147,3 @@ AC_OUTPUT(
 	[lswm/Makefile]
 	[python/Makefile]
 	)
-

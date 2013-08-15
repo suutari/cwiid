@@ -16,6 +16,7 @@
  *
  */
 
+#include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,7 +39,7 @@ void *router_thread(struct wiimote *wiimote)
 		ma.count = 0;
 		if (clock_gettime(CLOCK_REALTIME, &ma.timestamp)) {
 			if (print_clock_err) {
-				cwiid_err(wiimote, "clock_gettime error");
+				cwiid_err(wiimote, "clock_gettime error: %s", strerror(errno));
 				print_clock_err = 0;
 			}
 		}
@@ -69,7 +70,7 @@ void *router_thread(struct wiimote *wiimote)
 				break;
 			case RPT_BTN_ACC:
 				err = process_btn(wiimote, &buf[2], &ma) ||
-				      process_acc(wiimote, &buf[4], &ma);
+				      process_acc(wiimote, &buf[2], &ma);
 				break;
 			case RPT_BTN_EXT8:
 				err = process_btn(wiimote, &buf[2], &ma) ||
@@ -77,7 +78,7 @@ void *router_thread(struct wiimote *wiimote)
 				break;
 			case RPT_BTN_ACC_IR12:
 				err = process_btn(wiimote, &buf[2], &ma) ||
-				      process_acc(wiimote, &buf[4], &ma) ||
+				      process_acc(wiimote, &buf[2], &ma) ||
 				      process_ir12(wiimote, &buf[7], &ma);
 				break;
 			case RPT_BTN_EXT19:
@@ -86,7 +87,7 @@ void *router_thread(struct wiimote *wiimote)
 				break;
 			case RPT_BTN_ACC_EXT16:
 				err = process_btn(wiimote, &buf[2], &ma) ||
-				      process_acc(wiimote, &buf[4], &ma) ||
+				      process_acc(wiimote, &buf[2], &ma) ||
 				      process_ext(wiimote, &buf[7], 16, &ma);
 				break;
 			case RPT_BTN_IR10_EXT9:
@@ -96,7 +97,7 @@ void *router_thread(struct wiimote *wiimote)
 				break;
 			case RPT_BTN_ACC_IR10_EXT6:
 				err = process_btn(wiimote, &buf[2], &ma)  ||
-				      process_acc(wiimote, &buf[4], &ma)  ||
+				      process_acc(wiimote, &buf[2], &ma)  ||
 				      process_ir10(wiimote, &buf[7], &ma) ||
 				      process_ext(wiimote, &buf[17], 6, &ma);
 				break;
@@ -141,7 +142,7 @@ void *status_thread(struct wiimote *wiimote)
 {
 	struct mesg_array ma;
 	struct cwiid_status_mesg *status_mesg;
-	unsigned char buf[2];
+	unsigned char buf[6];
 
 	ma.count = 1;
 	status_mesg = &ma.array[0].status_mesg;
@@ -149,7 +150,7 @@ void *status_thread(struct wiimote *wiimote)
 	while (1) {
 		if (full_read(wiimote->status_pipe[0], status_mesg,
 		              sizeof *status_mesg)) {
-			cwiid_err(wiimote, "Pipe read error (status)");
+			cwiid_err(wiimote, "Pipe read error (status): %s", strerror(errno));
 			/* Quit! */
 			break;
 		}
@@ -161,13 +162,13 @@ void *status_thread(struct wiimote *wiimote)
 
 		if (status_mesg->ext_type == CWIID_EXT_UNKNOWN) {
 			/* Read extension ID */
-			if (cwiid_read(wiimote, CWIID_RW_REG, 0xA400FE, 2, &buf)) {
+			if (cwiid_read(wiimote, CWIID_RW_REG, 0xA400FA, 6, &buf)) {
 				cwiid_err(wiimote, "Read error (extension error)");
 				status_mesg->ext_type = CWIID_EXT_UNKNOWN;
 			}
 			/* If the extension didn't change, or if the extension is a
 			 * MotionPlus, no init necessary */
-			switch ((buf[0] << 8) | buf[1]) {
+			switch ((buf[4] << 8) | buf[5]) {
 			case EXT_NONE:
 				status_mesg->ext_type = CWIID_EXT_NONE;
 				break;
@@ -183,6 +184,22 @@ void *status_thread(struct wiimote *wiimote)
 			case EXT_MOTIONPLUS:
 				status_mesg->ext_type = CWIID_EXT_MOTIONPLUS;
 				break;
+			case EXT_INSTRUMENT:
+				switch (buf[0]) {
+				case 0x00:
+					status_mesg->ext_type = CWIID_EXT_GUITAR;
+					break;
+				case 0x01:
+					status_mesg->ext_type = CWIID_EXT_DRUMS;
+					break;
+				case 0x03:
+					status_mesg->ext_type = CWIID_EXT_TURNTABLES;
+					break;
+				default:
+					status_mesg->ext_type = CWIID_EXT_UNKNOWN;
+					break;
+				}
+				break;
 			case EXT_PARTIAL:
 				/* Everything (but MotionPlus) shows up as partial until initialized */
 				buf[0] = 0x55;
@@ -197,12 +214,12 @@ void *status_thread(struct wiimote *wiimote)
 						status_mesg->ext_type = CWIID_EXT_UNKNOWN;
 				}
 				/* Read extension ID */
-				else if (cwiid_read(wiimote, CWIID_RW_REG, 0xA400FE, 2, &buf)) {
+				else if (cwiid_read(wiimote, CWIID_RW_REG, 0xA400FA, 6, &buf)) {
 					cwiid_err(wiimote, "Read error (extension error)");
 					status_mesg->ext_type = CWIID_EXT_UNKNOWN;
 				}
 				else {
-					switch ((buf[0] << 8) | buf[1]) {
+					switch ((buf[4] << 8) | buf[5]) {
 					case EXT_NONE:
 					case EXT_PARTIAL:
 						status_mesg->ext_type = CWIID_EXT_NONE;
@@ -215,6 +232,22 @@ void *status_thread(struct wiimote *wiimote)
 						break;
 					case EXT_BALANCE:
 						status_mesg->ext_type = CWIID_EXT_BALANCE;
+						break;
+					case EXT_INSTRUMENT:
+						switch (buf[0]) {
+						case 0x00:
+							status_mesg->ext_type = CWIID_EXT_GUITAR;
+							break;
+						case 0x01:
+							status_mesg->ext_type = CWIID_EXT_DRUMS;
+							break;
+						case 0x03:
+							status_mesg->ext_type = CWIID_EXT_TURNTABLES;
+							break;
+						default:
+							status_mesg->ext_type = CWIID_EXT_UNKNOWN;
+							break;
+						}
 						break;
 					default:
 						status_mesg->ext_type = CWIID_EXT_UNKNOWN;
@@ -248,6 +281,7 @@ void *mesg_callback_thread(struct wiimote *wiimote)
 	cwiid_mesg_callback_t *callback = wiimote->mesg_callback;
 	struct mesg_array ma;
 	int cancelstate;
+	int err;
 
 	while (1) {
 		if (read_mesg_array(mesg_pipe, &ma)) {
@@ -258,12 +292,14 @@ void *mesg_callback_thread(struct wiimote *wiimote)
 		/* TODO: The callback can still be called once after disconnect,
 		 * although it's very unlikely.  User must keep track and avoid
 		 * accessing the wiimote struct after disconnect. */
-		if (pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cancelstate)) {
-			cwiid_err(wiimote, "Cancel state disable error (callback thread)");
+		err = pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cancelstate);
+		if (err) {
+			cwiid_err(wiimote, "Cancel state disable error (callback thread): %s", strerror(errno));
 		}
 		callback(wiimote, ma.count, ma.array, &ma.timestamp);
-		if (pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &cancelstate)) {
-			cwiid_err(wiimote, "Cancel state restore error (callback thread)");
+		err = pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &cancelstate);
+		if (err) {
+			cwiid_err(wiimote, "Cancel state restore error (callback thread): %s", strerror(errno));
 		}
 	}
 

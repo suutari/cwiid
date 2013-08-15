@@ -21,6 +21,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <errno.h>
 #include "cwiid_internal.h"
 
 int cwiid_command(cwiid_wiimote_t *wiimote, enum cwiid_command command,
@@ -48,32 +49,40 @@ int cwiid_command(cwiid_wiimote_t *wiimote, enum cwiid_command command,
 	return ret;
 }
 
-/* TODO: fix error reporting - this is public now and
- * should report its own errors */
 int cwiid_send_rpt(cwiid_wiimote_t *wiimote, uint8_t flags, uint8_t report,
                    size_t len, const void *data)
 {
-	unsigned char *buf;
+	unsigned char buf[32];
 
-	if ((buf = malloc((len*2) * sizeof *buf)) == NULL) {
-		cwiid_err(wiimote, "Memory allocation error (mesg array)");
+	if (wiimote == NULL) {
+		cwiid_err( wiimote, "cwiid_send_prt: wiimote is null" );
+		return -1;
+	}
+
+	if (wiimote->ctl_socket == -1) {
+		cwiid_err( wiimote, "cwiid_send_prt: wiimote control socket is invalid" );
+		return -1;
+	}
+
+   if (len+2 > sizeof(buf)) {
+		cwiid_err( wiimote, "cwiid_send_prt: %d bytes over maximum", len+2-sizeof(buf) );
 		return -1;
 	}
 
 	buf[0] = BT_TRANS_SET_REPORT | BT_PARAM_OUTPUT;
 	buf[1] = report;
-	memcpy(buf+2, data, len);
+    memcpy( &buf[2], data, len );
+
 	if (!(flags & CWIID_SEND_RPT_NO_RUMBLE)) {
 		buf[2] |= wiimote->state.rumble;
 	}
 
 	if (write(wiimote->ctl_socket, buf, len+2) != (ssize_t)(len+2)) {
-		free(buf);
-		return -1;
+		cwiid_err(wiimote, "cwiid_send_rpt: write: %s", strerror(errno));
+      return -1;
 	}
 	else if (verify_handshake(wiimote)) {
-		free(buf);
-		return -1;
+      return -1;
 	}
 
 	return 0;
@@ -122,7 +131,7 @@ int cwiid_set_rumble(cwiid_wiimote_t *wiimote, uint8_t rumble)
 	return 0;
 }
 
-int cwiid_set_rpt_mode(cwiid_wiimote_t *wiimote, uint8_t rpt_mode)
+int cwiid_set_rpt_mode(cwiid_wiimote_t *wiimote, uint16_t rpt_mode)
 {
 	return update_rpt_mode(wiimote, rpt_mode);
 }
@@ -135,6 +144,7 @@ int cwiid_read(cwiid_wiimote_t *wiimote, uint8_t flags, uint32_t offset,
 	struct rw_mesg mesg;
 	unsigned char *cursor;
 	int ret = 0;
+	int err;
 
 	/* Compose read request packet */
 	buf[0]=flags & (CWIID_RW_EEPROM | CWIID_RW_REG);
@@ -145,8 +155,9 @@ int cwiid_read(cwiid_wiimote_t *wiimote, uint8_t flags, uint32_t offset,
 	buf[5]=(unsigned char)(len & 0xFF);
 
 	/* Lock wiimote rw access */
-	if (pthread_mutex_lock(&wiimote->rw_mutex)) {
-		cwiid_err(wiimote, "Mutex lock error (rw_mutex)");
+	err = pthread_mutex_lock(&wiimote->rw_mutex);
+	if (err) {
+		cwiid_err(wiimote, "Mutex lock error (rw_mutex): %s", strerror(err));
 		return -1;
 	}
 
@@ -168,7 +179,7 @@ int cwiid_read(cwiid_wiimote_t *wiimote, uint8_t flags, uint32_t offset,
 	for (cursor = data; cursor - (unsigned char *)data < len;
 	     cursor += mesg.len) {
 		if (full_read(wiimote->rw_pipe[0], &mesg, sizeof mesg)) {
-			cwiid_err(wiimote, "Pipe read error (rw pipe)");
+			cwiid_err(wiimote, "Pipe read error (rw pipe): %s", strerror(errno));
 			ret = -1;
 			goto CODA;
 		}
@@ -197,8 +208,9 @@ CODA:
 	wiimote->rw_status = RW_IDLE;
 
 	/* Unlock rw_mutex */
-	if (pthread_mutex_unlock(&wiimote->rw_mutex)) {
-		cwiid_err(wiimote, "Mutex unlock error (rw_mutex) - deadlock warning");
+	err = pthread_mutex_unlock(&wiimote->rw_mutex);
+	if (err) {
+		cwiid_err(wiimote, "Mutex unlock error (rw_mutex) - deadlock warning: %s", strerror(err));
 	}
 
 	return ret;
@@ -212,13 +224,15 @@ int cwiid_write(cwiid_wiimote_t *wiimote, uint8_t flags, uint32_t offset,
 	uint16_t sent=0;
 	struct rw_mesg mesg;
 	int ret = 0;
+	int err;
 
 	/* Compose write packet header */
 	buf[0]=flags;
 
 	/* Lock wiimote rw access */
-	if (pthread_mutex_lock(&wiimote->rw_mutex)) {
-		cwiid_err(wiimote, "Mutex lock error (rw mutex)");
+	err = pthread_mutex_lock(&wiimote->rw_mutex);
+	if (err) {
+		cwiid_err(wiimote, "Mutex lock error (rw mutex): %s", strerror(err));
 		return -1;
 	}
 
@@ -245,7 +259,7 @@ int cwiid_write(cwiid_wiimote_t *wiimote, uint8_t flags, uint32_t offset,
 
 		/* Read packets from pipe */
 		if (read(wiimote->rw_pipe[0], &mesg, sizeof mesg) != sizeof mesg) {
-			cwiid_err(wiimote, "Pipe read error (rw pipe)");
+			cwiid_err(wiimote, "Pipe read error (rw pipe): %s", strerror(errno));
 			ret = -1;
 			goto CODA;
 		}
@@ -274,8 +288,9 @@ CODA:
 	wiimote->rw_status = RW_IDLE;
 
 	/* Unlock rw_mutex */
-	if (pthread_mutex_unlock(&wiimote->rw_mutex)) {
-		cwiid_err(wiimote, "Mutex unlock error (rw_mutex) - deadlock warning");
+	err = pthread_mutex_unlock(&wiimote->rw_mutex);
+	if (err) {
+		cwiid_err(wiimote, "Mutex unlock error (rw_mutex) - deadlock warning: %s", strerror(err));
 	}
 
 	return ret;

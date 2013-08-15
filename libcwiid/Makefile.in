@@ -12,7 +12,7 @@ LIB_INST_DIR = @libdir@
 INC_INST_DIR = @includedir@
 DEST_PKG_CONFIG_INST_DIR = $(ROOTDIR)@libdir@/pkgconfig
 
-include $(COMMON)/include/lib.mak
+include $(LIBINC)
 
 $(SHARED_LIB): $(SO_NAME) $(LINK_NAME)
 

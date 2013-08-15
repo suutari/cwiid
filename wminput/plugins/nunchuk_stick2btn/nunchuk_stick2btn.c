@@ -50,6 +50,8 @@ struct wmplugin_info *wmplugin_info() {
 
 int wmplugin_init(int id, cwiid_wiimote_t *arg_wiimote)
 {
+	(void)arg_wiimote;
+
 	data.buttons = 0;
 	if (wmplugin_set_rpt_mode(id, CWIID_RPT_NUNCHUK)) {
 		return -1;
@@ -58,8 +60,9 @@ int wmplugin_init(int id, cwiid_wiimote_t *arg_wiimote)
 	return 0;
 }
 
-struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg mesg[])
+struct wmplugin_data *wmplugin_exec(int mesg_count, union cwiid_mesg mesg[], struct timespec *timestamp)
 {
+   (void) timestamp;
 	int i;
 	struct wmplugin_data *ret = NULL;
 

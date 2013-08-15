@@ -6,12 +6,12 @@ APP_NAME = wmgui
 
 SOURCES = main.c interface.c support.c
 
-CFLAGS += @GTK_CFLAGS@ -I@top_builddir@/libcwiid
+CFLAGS += @GTK_CFLAGS@ -I@top_srcdir@/libcwiid
 LDFLAGS += -L@top_builddir@/libcwiid
 LDLIBS += @GTK_LIBS@ -lcwiid -lbluetooth -lm
 INST_DIR = @bindir@
 
-include $(COMMON)/include/app.mak
+include $(APPINC)
 
 distclean: clean
 	rm Makefile

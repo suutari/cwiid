@@ -2,9 +2,9 @@
 
 include @top_builddir@/defs.mak
 
-PLUGIN_NAME = ir_ptr
-SOURCES = ir_ptr.c
-CFLAGS += -I@top_srcdir@/wminput -I@top_srcdir@/libcwiid
+PLUGIN_NAME = ir_6dof
+SOURCES = ir_6dof.c
+CFLAGS += -I@top_builddir@/wminput -I@top_builddir@/libcwiid
 INST_DIR = $(CWIID_PLUGINS_DIR)
 
 include $(COMMON)/include/plugin.mak

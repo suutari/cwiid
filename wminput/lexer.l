@@ -40,6 +40,7 @@
 	} while (0)
 
 extern struct conf *cur_conf;
+#define YY_NO_INPUT
 %}
 
 WM			Wiimote\.

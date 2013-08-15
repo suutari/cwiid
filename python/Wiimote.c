@@ -59,6 +59,7 @@ static PyObject *Wiimote_get_state(Wiimote *self, void *closure);
 static PyObject *Wiimote_get_acc_cal(Wiimote *self, PyObject *args,
                                      PyObject *kwds);
 static PyObject *Wiimote_get_balance_cal(Wiimote *self);
+static PyObject *Wiimote_get_id(Wiimote *self);
 
 static PyObject *Wiimote_request_status(Wiimote *self);
 static int Wiimote_set_led(Wiimote *self, PyObject *PyLed, void *closure);
@@ -111,6 +112,7 @@ static PyGetSetDef Wiimote_GetSet[] = {
 	{"rumble", NULL, (setter)Wiimote_set_rumble, "Wiimote rumble state", NULL},
 	{"rpt_mode", NULL, (setter)Wiimote_set_rpt_mode, "Wiimote report mode",
 	 NULL},
+    {"id", (getter)Wiimote_get_id, NULL, "Wiimote id (assigned by cwiid)", NULL},
 	{NULL, NULL, NULL, NULL, NULL}
 };
 
@@ -154,6 +156,17 @@ PyTypeObject Wiimote_Type = {
 	(initproc)Wiimote_init,	/* tp_init */
 	0,						/* tp_alloc */
 	Wiimote_new,			/* tp_new */
+	0,						/* tp_free */
+	0,						/* tp_is_gc */
+	0,						/* tp_bases */
+	0,						/* tp_mro */
+	0,						/* tp_cache */
+	0,						/* tp_subclasses */
+	0,						/* tp_weaklist */
+	0,						/* tp_del */
+#if PY_VERSION_HEX <= 02060000
+	0,						/* tp_version_tag */
+#endif
 };
 
 /* Allocate and deallocate functions */
@@ -161,6 +174,9 @@ static PyObject *
 	Wiimote_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
 	Wiimote* self;
+
+	(void)args;
+	(void)kwds;
 
 	if (!(self = (Wiimote *) type->tp_alloc(type, 0))) {
 		return NULL;
@@ -307,6 +323,8 @@ static int
 {
 	PyObject *OldCallback;
 
+	(void)closure;
+
 	if (!self->wiimote) {
 		SET_CLOSED_ERROR;
 		return -1;
@@ -369,10 +387,22 @@ static PyObject *Wiimote_get_mesg(Wiimote *self)
 	return PyMesg;
 }
 
+static PyObject *Wiimote_get_id(Wiimote* self)
+{
+	if (!self->wiimote) {
+		SET_CLOSED_ERROR;
+		return NULL;
+	}
+
+    return PyInt_FromLong(cwiid_get_id(self->wiimote));
+}
+
 static PyObject *Wiimote_get_state(Wiimote* self, void *closure)
 {
 	struct cwiid_state state;
 	PyObject *PyState;
+
+	(void)closure;
 
 	if (!self->wiimote) {
 		SET_CLOSED_ERROR;
@@ -563,14 +593,14 @@ static PyObject *Wiimote_get_state(Wiimote* self, void *closure)
 	case CWIID_EXT_MOTIONPLUS:
 		if (state.rpt_mode & CWIID_RPT_MOTIONPLUS) {
 			PyExt = Py_BuildValue("{s:(I,I,I),s:(I,I,I)}",
-		                          "angle_rate",
-                                  state.ext.motionplus.angle_rate[CWIID_PHI],
-                                  state.ext.motionplus.angle_rate[CWIID_THETA],
-                                  state.ext.motionplus.angle_rate[CWIID_PSI],
-                                  "low_speed",
-                                  state.ext.motionplus.low_speed[CWIID_PHI],
-                                  state.ext.motionplus.low_speed[CWIID_THETA],
-                                  state.ext.motionplus.low_speed[CWIID_PSI]);
+			                      "angle_rate",
+			                       state.ext.motionplus.angle_rate[CWIID_PHI],
+			                       state.ext.motionplus.angle_rate[CWIID_THETA],
+			                       state.ext.motionplus.angle_rate[CWIID_PSI],
+			                      "low_speed",
+			                       state.ext.motionplus.low_speed[CWIID_PHI],
+			                       state.ext.motionplus.low_speed[CWIID_THETA],
+			                       state.ext.motionplus.low_speed[CWIID_PSI]);
 
 			if (!PyExt) {
 				Py_DECREF(PyState);
@@ -677,6 +707,8 @@ static int Wiimote_set_led(Wiimote *self, PyObject *PyLed, void *closure)
 {
 	long led;
 
+	(void)closure;
+
 	if (!self->wiimote) {
 		SET_CLOSED_ERROR;
 		return -1;
@@ -700,6 +732,8 @@ static int
 {
 	long rumble;
 
+	(void)closure;
+
 	if (!self->wiimote) {
 		SET_CLOSED_ERROR;
 		return -1;
@@ -722,6 +756,8 @@ static int
 	Wiimote_set_rpt_mode(Wiimote *self, PyObject *PyRptMode, void *closure)
 {
 	long rpt_mode;
+
+	(void)closure;
 
 	if (!self->wiimote) {
 		SET_CLOSED_ERROR;
@@ -1010,13 +1046,13 @@ PyObject *ConvertMesgArray(int mesg_count, union cwiid_mesg mesg[])
 		case CWIID_MESG_MOTIONPLUS:
 			mesgVal = Py_BuildValue("{s:(I,I,I),s:(I,I,I)}",
 			                        "angle_rate",
-                                    mesg[i].motionplus_mesg.angle_rate[CWIID_PHI],
-                                    mesg[i].motionplus_mesg.angle_rate[CWIID_THETA],
-                                    mesg[i].motionplus_mesg.angle_rate[CWIID_PSI],
-                                    "low_speed",
-                                    mesg[i].motionplus_mesg.low_speed[CWIID_PHI],
-                                    mesg[i].motionplus_mesg.low_speed[CWIID_THETA],
-                                    mesg[i].motionplus_mesg.low_speed[CWIID_PSI]);
+			                         mesg[i].motionplus_mesg.angle_rate[CWIID_PHI],
+			                         mesg[i].motionplus_mesg.angle_rate[CWIID_THETA],
+			                         mesg[i].motionplus_mesg.angle_rate[CWIID_PSI],
+			                        "low_speed",
+			                         mesg[i].motionplus_mesg.low_speed[CWIID_PHI],
+			                         mesg[i].motionplus_mesg.low_speed[CWIID_THETA],
+			                         mesg[i].motionplus_mesg.low_speed[CWIID_PSI]);
                                     
 			break;
 		case CWIID_MESG_ERROR:

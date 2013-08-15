@@ -21,8 +21,16 @@ AWK = @AWK@
 LEX = @LEX@
 YACC = @YACC@
 PYTHON = @PYTHON@
+GTK = @WANT_GTK@
 
 COMMON = @abs_top_builddir@/common
+COMMONSTATIC = @abs_top_srcdir@/common
+APPINC = $(COMMONSTATIC)/include/app.mak
+DEPINC = $(COMMONSTATIC)/include/dep.mak
+LIBINC = $(COMMON)/include/lib.mak
+PLUGININC = $(COMMONSTATIC)/include/plugin.mak
+
+
 
 ifdef DESTDIR
 	ROOTDIR = $(DESTDIR:%/=%)
@@ -33,4 +41,4 @@ CWIID_PLUGINS_DIR = $(ROOTDIR)@CWIID_PLUGINS_DIR@
 
 DEBUGFLAGS = -g
 WARNFLAGS = -Wall -W
-CFLAGS = $(DEBUGFLAGS) $(WARNFLAGS) @DEFS@ -I$(COMMON)/include
+CFLAGS += $(DEBUGFLAGS) $(WARNFLAGS) @DEFS@ -I$(COMMON)/include
