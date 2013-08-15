@@ -28,7 +28,6 @@ QUICKSTART
 5. ./configure --with-cwiid-config-dir=/etc/cwiid/
 6. make
 7. sudo make install
-
 8. sudo modprobe uinput
 9. wminput -c <key_bind_file>
 
@@ -37,6 +36,7 @@ You can find key bind files at /etc/cwiid/wminput/
 DESCRIPTION
 -----------
 The CWiid package contains the following parts:
+
 1. libcwiid - wiimote API.
 2. cwiid module - python interface to libcwiid
 3. wmgui - GTK gui to the wiimote.
