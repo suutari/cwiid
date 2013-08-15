@@ -161,8 +161,7 @@ int cwiid_find_wiimote(bdaddr_t *bdaddr, int timeout)
 	int bdinfo_count;
 
 	if (timeout == -1) {
-		while ((bdinfo_count = cwiid_get_bdinfo_array(-1, 2, 1, &bdinfo, 0))
-		       == 0);
+		while ((bdinfo_count = cwiid_get_bdinfo_array(-1, 2, 1, &bdinfo, 0)) == 0);
 		if (bdinfo_count == -1) {
 			return -1;
 		}
