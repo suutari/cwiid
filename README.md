@@ -33,19 +33,22 @@ awk, bison, flex, bluez-libs, gtk+-2 dev libs, python 2.4 or greater, python dev
 INSTALLATION
 ------------
 If installing from git, run the following commands.  Otherwise, or if you aren't sure, ignore them.
-aclocal
-autoconf
+
+- aclocal
+- autoconf
 
 All users should then run:
-./configure
-make
-sudo make install
+
+- ./configure
+- make
+- sudo make install
 
 To install global configuration files to the more familiar /etc rather than /usr/etc or /usr/local/etc, execute configure with --sysconfdir=/etc.
 
 While CWiid is still in the early development stages, installation directories and filenames are changed more often than in a mature, stable package.  In order to prevent the collection of obselete directories and files, it is recommended that you run 'make uninstall && make uninstall_config' from your current CWiid source directory before installing a new one.  Files are currently installed to the following directories: /usr/local/{bin,etc,lib,lib/cwiid,lib/python2.X/site-packages,share/doc,share/man}.  Recently, but no longer, used directories include /usr/share/CWiid - this directory may be deleted.
 
 Many distributions do not have /usr/local/lib in the library search path, and on many of these same distributions, the library installation directory (as determined by autoconf) is /usr/local/lib, creating a problem when you try to run programs depending on libraries installed there. There are two clean ways to fix this:
+
 1. Add a --prefix=/usr argument to ./configure
 2. Add /usr/local/lib to /etc/ld.so.conf, then run ldconfig.
 
