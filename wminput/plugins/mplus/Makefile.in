@@ -2,8 +2,8 @@
 
 include @top_builddir@/defs.mak
 
-PLUGIN_NAME = acc
-SOURCES = acc.c
+PLUGIN_NAME = mplus
+SOURCES = mplus.c
 CFLAGS += -I@top_builddir@/wminput -I@top_builddir@/libcwiid
 LDLIBS += -lm
 INST_DIR = $(CWIID_PLUGINS_DIR)
