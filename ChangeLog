@@ -1,3 +1,6 @@
+2013-12-15 Frank Löffler <knarf@cct.lsu.edu>
+	* fixed a couple of build problems
+
 2013-08-16 Seppo Erviälä <seppo.erviala@iki.fi>
 	Collected all the projects from github together
 	* Initial motion plus support
