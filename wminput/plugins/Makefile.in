@@ -2,7 +2,7 @@
 
 include @top_builddir@/defs.mak
 
-PLUGINS = 3dof acc ir_ptr ir_6dof led mplus nunchuk_acc nunchuck_mouse nunchuk_stick2btn nunchuk_stick_ptr screwdriver
+PLUGINS = 3dof acc ir_ptr ir_6dof led mplus nunchuk_acc nunchuk_mouse nunchuk_stick2btn nunchuk_stick_ptr screwdriver
 
 all install clean distclean uninstall: TARGET += $(MAKECMDGOALS)
 
