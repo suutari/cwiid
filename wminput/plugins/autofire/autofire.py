@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 # Copyright (C) 2013 Frank Löffler <knarf@cct.lsu.edu>
 #
 # This program is free software; you can redistribute it and/or modify
