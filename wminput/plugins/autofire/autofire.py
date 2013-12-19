@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2013 Frank Löffler <knarf@cct.lsu.edu>
@@ -30,8 +29,8 @@
 import wmplugin
 import cwiid
 
-# This is BTN_A by default
-Button = 8
+# This disables effects from the module by default, use e.g. 8 for BTN_A
+Button = 0
 
 # remember state of Button
 pressed     = False
@@ -55,6 +54,9 @@ def wmplugin_init(id, wiimote):
 # This is called whenever something changes in the inputs of this plugin
 def wmplugin_exec(mesg):
   global pressed, fire_toggle, Button
+  # early escape for disabled plugin
+  if Button == 0:
+    return [False], []
   # go through different message types (e.g. IR/Buttons/...)
   for m in mesg:
     # For button events: look for the button we trigger on
