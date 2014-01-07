@@ -291,10 +291,18 @@ cwiid_wiimote_t *cwiid_new(int ctl_socket, int int_socket, int flags)
 		cwiid_err(wiimote, "Thread creation error (router thread)");
 		goto ERR_HND;
 	}
+	if (pthread_detach(wiimote->router_thread)) {
+		cwiid_err(wiimote, "Could not detach thread error (router thread)");
+		goto ERR_HND;
+	}
 	router_thread_init = 1;
 	if (pthread_create(&wiimote->status_thread, NULL,
 	                   (void *(*)(void *))&status_thread, wiimote)) {
 		cwiid_err(wiimote, "Thread creation error (status thread)");
+		goto ERR_HND;
+	}
+	if (pthread_detach(wiimote->status_thread)) {
+		cwiid_err(wiimote, "Could not detach thread error (status thread)");
 		goto ERR_HND;
 	}
 	status_thread_init = 1;
@@ -311,23 +319,14 @@ ERR_HND:
 	if (wiimote) {
 		/* Close threads */
 		if (router_thread_init) {
-			pthread_cancel(wiimote->router_thread);
-			if (pthread_join(wiimote->router_thread, &pthread_ret)) {
-				cwiid_err(wiimote, "Thread join error (router thread)");
-			}
-			else if (!((pthread_ret == PTHREAD_CANCELED) &&
-			         (pthread_ret == NULL))) {
-				cwiid_err(wiimote, "Bad return value from router thread");
+			if (pthread_cancel(wiimote->router_thread)) {
+				cwiid_err(wiimote, "Thread cancel error (router thread)");
 			}
 		}
 
 		if (status_thread_init) {
-			pthread_cancel(wiimote->status_thread);
-			if (pthread_join(wiimote->status_thread, &pthread_ret)) {
-				cwiid_err(wiimote, "Thread join error (status thread)");
-			}
-			else if (!((pthread_ret == PTHREAD_CANCELED) && (pthread_ret == NULL))) {
-				cwiid_err(wiimote, "Bad return value from status thread");
+			if (pthread_cancel(wiimote->status_thread)) {
+				cwiid_err(wiimote, "Thread cancel error (status thread)");
 			}
 		}
 
@@ -381,25 +380,15 @@ int cwiid_close(cwiid_wiimote_t *wiimote)
 		cwiid_set_rumble(wiimote, 0);
 	}
 
-	/* Cancel and join router_thread and status_thread */
+	/* Cancel router_thread and status_thread */
 	if (pthread_cancel(wiimote->router_thread)) {
+		cwiid_err(wiimote, "Thread cancel error (router thread)");
 		/* if thread quit abnormally, would have printed it's own error */
-	}
-	if (pthread_join(wiimote->router_thread, &pthread_ret)) {
-		cwiid_err(wiimote, "Thread join error (router thread)");
-	}
-	else if (!((pthread_ret == PTHREAD_CANCELED) || (pthread_ret == NULL))) {
-		cwiid_err(wiimote, "Bad return value from router thread");
 	}
 
 	if (pthread_cancel(wiimote->status_thread)) {
+		cwiid_err(wiimote, "Thread cancel error (status thread)");
 		/* if thread quit abnormally, would have printed it's own error */
-	}
-	if (pthread_join(wiimote->status_thread, &pthread_ret)) {
-		cwiid_err(wiimote, "Thread join error (status thread)");
-	}
-	else if (!((pthread_ret == PTHREAD_CANCELED) || (pthread_ret == NULL))) {
-		cwiid_err(wiimote, "Bad return value from status thread");
 	}
 
 	if (wiimote->mesg_callback) {

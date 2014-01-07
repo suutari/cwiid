@@ -184,17 +184,10 @@ int cancel_rw(struct wiimote *wiimote)
 
 int cancel_mesg_callback(struct wiimote *wiimote)
 {
-	int ret = 0;
-
 	if (pthread_cancel(wiimote->mesg_callback_thread)) {
 		cwiid_err(wiimote, "Thread cancel error (callback thread)");
-		ret = -1;
+		return -1;
 	}
 
-	if (pthread_detach(wiimote->mesg_callback_thread)) {
-		cwiid_err(wiimote, "Thread detach error (callback thread)");
-		ret = -1;
-	}
-
-	return ret;
+	return 0;
 }

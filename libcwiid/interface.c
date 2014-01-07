@@ -100,6 +100,10 @@ int cwiid_set_mesg_callback(cwiid_wiimote_t *wiimote,
 			cwiid_err(wiimote, "Thread creation error (callback thread)");
 			return -1;
 		}
+		if (pthread_detach(wiimote->mesg_callback_thread)) {
+			cwiid_err(wiimote, "Thread detach error (callback thread)");
+			return -1;
+		}
 	}
 
 	return 0;
