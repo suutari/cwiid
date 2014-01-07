@@ -8,7 +8,7 @@ Wiimote.Left	= KEY_LEFT
 Wiimote.Right	= KEY_RIGHT
 Wiimote.Minus	= KEY_BACK
 Wiimote.Plus	= KEY_FORWARD
-Wiimote.Home	= KEY_HOME
+Wiimote.Home	= BTN_MIDDLE
 Wiimote.1		= KEY_PROG1
 Wiimote.2		= KEY_PROG2
 

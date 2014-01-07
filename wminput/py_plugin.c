@@ -472,7 +472,9 @@ int py_plugin_exec(struct plugin *plugin, int mesg_count,
 	}
 
 	if (PySequence_Size(PyButtonData) != plugin->info->button_count) {
-		wminput_err("Type error on wminput_exec: bad button sequence");
+		wminput_err("Type error on wminput_exec: bad button sequence "
+                "(expected %d arguments, got %d)",
+                plugin->info->button_count, PySequence_Size(PyButtonData));
 		Py_DECREF(PyData);
 		return -1;
 	}

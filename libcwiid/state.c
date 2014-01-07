@@ -23,10 +23,12 @@
 int update_state(struct wiimote *wiimote, struct mesg_array *ma)
 {
 	int i;
+	int err;
 	union cwiid_mesg *mesg;
 
-	if (pthread_mutex_lock(&wiimote->state_mutex)) {
-		cwiid_err(wiimote, "Mutex lock error (state mutex)");
+	err = pthread_mutex_lock(&wiimote->state_mutex);
+	if (err) {
+		cwiid_err(wiimote, "Mutex lock error (state mutex): %s", strerror(err));
 		return -1;
 	}
 
@@ -86,6 +88,32 @@ int update_state(struct wiimote *wiimote, struct mesg_array *ma)
 			       mesg->motionplus_mesg.low_speed,
 			       sizeof wiimote->state.ext.motionplus.low_speed);
 			break;
+		case CWIID_MESG_GUITAR:
+			memcpy(wiimote->state.ext.guitar.stick,
+			       mesg->guitar_mesg.stick,
+			       sizeof wiimote->state.ext.guitar.stick);
+			wiimote->state.ext.guitar.whammy = mesg->guitar_mesg.whammy;
+			wiimote->state.ext.guitar.touch_bar = mesg->guitar_mesg.touch_bar;
+			wiimote->state.ext.guitar.buttons = mesg->guitar_mesg.buttons;
+			break;
+		case CWIID_MESG_DRUMS:
+			memcpy(wiimote->state.ext.drums.stick,
+			       mesg->drums_mesg.stick,
+			       sizeof wiimote->state.ext.drums.stick);
+			wiimote->state.ext.drums.velocity = mesg->drums_mesg.velocity;
+			wiimote->state.ext.drums.velocity_source = mesg->drums_mesg.velocity_source;
+			wiimote->state.ext.drums.buttons = mesg->drums_mesg.buttons;
+			break;
+		case CWIID_MESG_TURNTABLES:
+			memcpy(wiimote->state.ext.turntables.stick,
+			       mesg->turntables_mesg.stick,
+			       sizeof wiimote->state.ext.turntables.stick);
+			wiimote->state.ext.turntables.crossfader = mesg->turntables_mesg.crossfader;
+			wiimote->state.ext.turntables.effect_dial = mesg->turntables_mesg.effect_dial;
+			wiimote->state.ext.turntables.left_turntable = mesg->turntables_mesg.left_turntable;
+			wiimote->state.ext.turntables.right_turntable = mesg->turntables_mesg.right_turntable;
+			wiimote->state.ext.turntables.buttons = mesg->turntables_mesg.buttons;
+			break;
 		case CWIID_MESG_ERROR:
 			wiimote->state.error = mesg->error_mesg.error;
 			break;
@@ -95,9 +123,10 @@ int update_state(struct wiimote *wiimote, struct mesg_array *ma)
 		}
 	}
 
-	if (pthread_mutex_unlock(&wiimote->state_mutex)) {
+	err = pthread_mutex_unlock(&wiimote->state_mutex);
+	if (err) {
 		cwiid_err(wiimote, "Mutex unlock error (state mutex) - "
-		                   "deadlock warning");
+		                   "deadlock warning: %s", strerror(err));
 		return -1;
 	}
 
@@ -138,11 +167,13 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t rpt_mode)
 	uint8_t rpt_type;
 	struct write_seq *ir_enable_seq;
 	int seq_len;
+	int err;
 
 	/* rpt_mode = bitmask of requested report types */
 	/* rpt_type = report id sent to the wiimote */
-	if (pthread_mutex_lock(&wiimote->rpt_mutex)) {
-		cwiid_err(wiimote, "Mutex lock error (rpt mutex)");
+	err = pthread_mutex_lock(&wiimote->rpt_mutex);
+	if (err) {
+		cwiid_err(wiimote, "Mutex lock error (rpt mutex): %s", strerror(err));
 		return -1;
 	}
 
@@ -155,9 +186,12 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t rpt_mode)
 
 	/* Pick a report mode based on report flags */
 	if ((rpt_mode & CWIID_RPT_EXT) &&
-	  ((wiimote->state.ext_type == CWIID_EXT_NUNCHUK) ||
-	   (wiimote->state.ext_type == CWIID_EXT_CLASSIC) ||
-	   (wiimote->state.ext_type == CWIID_EXT_MOTIONPLUS))) {
+	    ((wiimote->state.ext_type == CWIID_EXT_NUNCHUK) ||
+	     (wiimote->state.ext_type == CWIID_EXT_CLASSIC) ||
+	     (wiimote->state.ext_type == CWIID_EXT_MOTIONPLUS) ||
+	     (wiimote->state.ext_type == CWIID_EXT_GUITAR) ||
+	     (wiimote->state.ext_type == CWIID_EXT_DRUMS) ||
+	     (wiimote->state.ext_type == CWIID_EXT_TURNTABLES))) {
 		if ((rpt_mode & CWIID_RPT_IR) && (rpt_mode & CWIID_RPT_ACC)) {
 			rpt_type = RPT_BTN_ACC_IR10_EXT6;
 			ir_enable_seq = ir_enable10_seq;
@@ -247,12 +281,25 @@ int update_rpt_mode(struct wiimote *wiimote, int8_t rpt_mode)
 	  (CWIID_RPT_MOTIONPLUS & ~rpt_mode & wiimote->state.rpt_mode)) {
 		memset(&wiimote->state.ext, 0, sizeof wiimote->state.ext);
 	}
+	else if ((wiimote->state.ext_type == CWIID_EXT_GUITAR) &&
+	  (CWIID_RPT_GUITAR & ~rpt_mode & wiimote->state.rpt_mode)) {
+		memset(&wiimote->state.ext, 0, sizeof wiimote->state.ext);
+	}
+	else if ((wiimote->state.ext_type == CWIID_EXT_DRUMS) &&
+	  (CWIID_RPT_DRUMS & ~rpt_mode & wiimote->state.rpt_mode)) {
+		memset(&wiimote->state.ext, 0, sizeof wiimote->state.ext);
+	}
+	else if ((wiimote->state.ext_type == CWIID_EXT_TURNTABLES) &&
+	  (CWIID_RPT_TURNTABLES & ~rpt_mode & wiimote->state.rpt_mode)) {
+		memset(&wiimote->state.ext, 0, sizeof wiimote->state.ext);
+	}
 
 	wiimote->state.rpt_mode = rpt_mode;
 
-	if (pthread_mutex_unlock(&wiimote->rpt_mutex)) {
+	err = pthread_mutex_unlock(&wiimote->rpt_mutex);
+	if (err) {
 		cwiid_err(wiimote, "Mutex unlock error (rpt mutex) - "
-		          "deadlock warning");
+		          "deadlock warning: %s", strerror(err));
 		return -1;
 	}
 

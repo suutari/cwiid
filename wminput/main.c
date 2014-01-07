@@ -681,7 +681,6 @@ void process_plugin(struct plugin *plugin, int mesg_count,
 			break;
 		case CWIID_MESG_MOTIONPLUS:
 			flag = CWIID_RPT_MOTIONPLUS;
-			break;
 		default:
 			break;
 		}
