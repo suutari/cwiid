@@ -382,12 +382,10 @@ int cwiid_close(cwiid_wiimote_t *wiimote)
 
 	/* Cancel router_thread and status_thread */
 	if (pthread_cancel(wiimote->router_thread)) {
-		cwiid_err(wiimote, "Thread cancel error (router thread)");
 		/* if thread quit abnormally, would have printed it's own error */
 	}
 
 	if (pthread_cancel(wiimote->status_thread)) {
-		cwiid_err(wiimote, "Thread cancel error (status thread)");
 		/* if thread quit abnormally, would have printed it's own error */
 	}
 
